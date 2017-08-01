@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ActiveRez</title>
+    <link rel="icon" href="/img/icon.png">
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css">
+</head>
+
+<body ng-app='reset-app' ng-controller='reset-contr'>
+    <div class='container'>
+        <div class='col-md-8 col-md-offset-2 panel panel-primary'>
+            <div class='panel-heading'>
+                <h3>Reset Password</h3></div>
+            <div class='panel-body'>
+                <form>
+                    <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body'>&nbsp;Account: {{user.name}}</div>
+                    <div class='row'>
+                        <div class='input-group col-md-8 col-md-offset-2'>
+                            <span class='input-group-addon'>Enter Password</span>
+                            <input type="password" placeholder='Enter a password' ng-model='pwd' class='form-control' required>
+                        </div>
+                    </div>
+                    <br>
+                    <div class='row'>
+                        <div class='input-group col-md-8 col-md-offset-2'>
+                            <span class='input-group-addon'>Repeat Password</span>
+                            <input type="password" placeholder='Enter password again, just to make sure!' ng-model='pwdDup' class='form-control' required>
+                        </div>
+                        <div class='alert alert-danger col-md-8 col-md-offset-2' ng-if='pwd && pwdDup && pwd!=pwdDup'>Error: Your passwords don't match!</div>
+                    </div>
+                    <br>
+                    <button class='btn btn-primary col-md-2 col-md-offset-5' ng-click='doReset()'>
+                        Reset
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src='/socket.io-client/dist/socket.io.min.js'></script>
+    <script src="/jquery/dist/jquery.min.js"></script>
+    <script src="/jquery-ui/jquery-ui.min.js"></script>
+    <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/angular/angular.min.js"></script>
+    <script src="/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <script src="/angular-animate/angular-animate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.4.0/ui-bootstrap-tpls.min.js"></script>
+    <!-- <script src="/angular-bootstrap-context-menu/dist/bootstrapContextMenu-min.js"></script> -->
+    <script src='/angular-sanitize/angular-sanitize.js'></script>
+    <script src="/bootbox.js/bootbox.js"></script>
+    <script src="/js/all.js"></script>
+</body>
+
+</html>

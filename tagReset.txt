@@ -1,0 +1,31 @@
+db.Tags.remove({});db.Tags.insert([{
+	name:'User Interface'	
+},{
+	name:'User Experience'	
+},{
+	name:'Front-End'	
+},{
+	name:'Back-End'	
+},{
+	name:'Full-Stack'	
+},{
+	name:'Library'	
+},{
+	name:'Framework'	
+},{
+	name:'JavaScript'	
+},{
+	name:'Testing'	
+},{
+	name:'Database'	
+},{
+	name:'Module'	
+},{
+	name:'CSS'	
+},{
+	name:'HTML'	
+},{
+	name:'Security'	
+},{
+	name:'Auth'	
+}])

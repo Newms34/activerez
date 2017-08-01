@@ -1,0 +1,121 @@
+html,
+body {
+    width: 100%;
+    margin: 0;
+    height: 100%;
+    padding-top: 40px;
+    background-attachment: fixed;
+    & #main-box {
+        width: 95%;
+        position: relative;
+        left: 2.5%;
+        min-height: 100vh;
+        padding: 10px;
+        background: #fff;
+        &.ng-enter {
+            /* transition on enter for .5s */
+            transition: 2s;
+            /* start with opacity 0 (invisible) */
+            opacity: 0;
+        }
+        /* end 'enter' transition */
+        &.ng-enter-active {
+            /* end with opacity 1 (fade in) */
+            opacity: 1;
+        }
+        // &.ng-leave {
+        //     transition: 2s;
+        //     opacity: 1;
+        // }
+        // &.ng-leave-active {
+        //     opacity: 0;
+        // }
+    }
+}
+
+.reg-grp {
+    background: #339;
+    color: #fff;
+}
+
+label {
+    font-weight: normal;
+    border-bottom: 1px solid #dde;
+}
+
+.navbar-dark {
+    background: #335;
+    color: #fff;
+    & li a {
+        color: #fff;
+        transition-duration: .5s;
+        &:hover {
+            background: #669;
+        }
+    }
+}
+
+.panel {
+    /*remove weird side-padding from bootstrap panels*/
+    padding-left: 0;
+    padding-right: 0;
+    &.exp {
+        padding: 10px;
+    }
+}
+
+.big-info {
+    min-height: 100px;
+    & > .form-control {
+        min-height: 100px;
+    }
+}
+
+.exp-place {
+    font-weight: 700;
+    & .pos {
+        font-style: italic;
+    }
+}
+
+.no-xp {
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+
+.tags {
+    padding: 3px;
+    line-height: 12px;
+    background: #565679;
+    color: #fff;
+    border-radius: 2px;
+    width:15%;
+    display:inline-block;
+    text-align:center;
+    margin-right:3px;
+}
+
+.med-info {
+    min-height: 60px;
+    & > .form-control {
+        min-height: 60px;
+    }
+}
+
+.huge-info {
+    min-height: 200px;
+    & > .form-control {
+        min-height: 200px;
+    }
+}
+
+.picked {
+    & > span {
+        background: #339;
+        color: #fff;
+    }
+}
+
+.unpicked {
+    opacity: .5;
+}

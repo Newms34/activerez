@@ -1,0 +1,7 @@
+<div ng-controller='main-cont' id='full-win'>
+    <div ng-include="'/components/nav.html'"></div>
+    <div id='main-box'>
+        <ui-view  data='thing'></ui-view>
+    </div>
+    <div ng-include="'/components/chat.html'"  ng-show='showChat'></div>
+</div>
