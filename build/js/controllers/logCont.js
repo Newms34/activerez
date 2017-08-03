@@ -1,15 +1,41 @@
 app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
-    $scope.jobs = [];
-    $scope.edu = [];
-    $scope.exp = [];
-    $scope.skills = [];
+    $scope.person = {
+        jobs: [],
+        edu: [],
+        oth: [],
+        skills: []
+    }
     $scope.allSkills = [];
     $scope.tags = [];
     $scope.newSkill = {
-            name: '',
-            tags: []
-        };
-        //get list of all skills, so new user can pick from them
+        name: '',
+        tags: []
+    };
+    $scope.pushNewItem = (t)=>{
+        if(t=='Work'){
+            $scope.person.jobs.push(angular.copy($scope.newWork));
+            $scope.newWork = {}
+        }
+        else{
+            var lc=t.toLowerCase();
+            console.log('pushing into',$scope.person[lc])
+            $scope.person[lc].push(angular.copy($scope['new'+t]));
+            $scope['new'+t] = {};
+            console.log('result',$scope.person[lc])
+        }
+        $scope['add'+t+'Viz']=false;
+    }
+    $scope.pickTitle = () => {
+        if ($scope.newJobNew) {
+            //user enters NEW item ($scope.newJobNew, for ex)
+            $scope.person.jobTitle = $scope.jobNew
+        } else {
+            //user picks from PREV items ($scope.jobOld, for ex)
+            $scope.person.jobTitle = $scope.jobOld
+        }
+        $scope.titlePicked = true;
+    };
+    //get list of all skills, so new user can pick from them
     $http.get('/skills/all').then((r) => {
         $scope.allSkills = r.data;
     })
@@ -50,6 +76,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             })
         }
     };
+    $scope.titlePicked = false;
     $scope.nameDup = false;
     $scope.nt = null;
     $scope.nameTimer = function() {
@@ -64,7 +91,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             $scope.nameDup = r.data != 'okay';
         })
     }
-    $scope.explTxts = ['General information for your account. You know, the usual stuff, like login info.']
+    $scope.explTxts = ['Basic information for your account. You know, the usual stuff, like login info.', 'General information. Who/where are you.', 'Give potential employers a summary of who you are. Write brief summary of yourself, and pick a job title.', 'What positions have you had in the past?', 'Where did you learn your stuff? Tell us here!', 'Not all great experience comes from a 9-to-5. Got some great extra-curricular experience? Let us know here!', 'The fun part! Tell us all the cool things you can do! Either pick a skill from the list, or add your own.']
     $scope.expl = function(n) {
         bootbox.alert($scope.explTxts[n]);
     };
@@ -79,16 +106,6 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             //first, check if anything's invalid
             bootbox.alert('One or more of your fields is missing. Please double-check your information!');
             return false;
-        } else if (!$scope.myMeds.length && !$scope.discussMeds.length && $scope.genderPref == 0) {
-            //now, we check to see if the user has not specified no preferences. While this is allowed, it's a little... suspicious. And unhelpful!
-            bootbox.confirm('No rez info! Continue? ', function(r) {
-                if (!r || r == null) {
-                    //user says no
-                    return true;
-                } else {
-                    $scope.doReg();
-                }
-            })
         } else if ($scope.pwd != $scope.pwdDup) {
             bootbox.alert('Your passwords don&rsquo;t match!')
         } else if ($scope.nameDup) {
@@ -99,18 +116,9 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         }
     };
     $scope.doReg = function() {
-        var usr = {
-            name: $scope.user,
-            first: $scope.fname,
-            last: $scope.lname,
-            pass: $scope.pwd,
-            city: $scope.city,
-            state: $scope.state,
-            email: $scope.email,
-            creationDate: new Date().getTime()
-        }
-
-        $http.post('/user/new', usr).then(function(r) {
+        //TEMPORARY SHORT CIRCUIT
+        console.log('FULL PERSON OBJ:',$scope.person);
+        $http.post('/user/new', $scope.person).then(function(r) {
             if (r.data == 'err') {
                 bootbox.alert('There was an issue registering! Sorry about that!');
             } else {
@@ -130,34 +138,42 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         });
     }
     $scope.newWork = {};
+    $scope.newEdu = {};
+    $scope.addOthViz = false;
     $scope.addWorkViz = false;
+    $scope.addEduViz = false;
     $scope.addTag = () => {
         if (!$scope.newSkillTag) {
             return false; //no tag, so dont add;
         } else {
-            $scope.newSkill.tags.push({name:$scope.newSkillTag,
-                rating:100});
+            $scope.newSkill.tags.push({
+                name: $scope.newSkillTag,
+                rating: 100
+            });
         }
     }
     $scope.newSkNew = false;
     $scope.newJobNew = false;
+    $scope.skillsToRecord = []
     $scope.removeTag = (n) => {
         $scope.newSkill.slice(n, 1)
     }
     $scope.addSkill = function() {
-        var theSkill=null;
+        var theSkill = null;
         if ($scope.newSkNew) {
+            //adding new skill
             theSkill = angular.copy($scope.newSkill);
-        }else{
-           theSkill = angular.copy($scope.pikSkill);
+            $scope.skillsToRecord.push(angular.copy(theSkill));//add this to a list of brand-new skills we'll need to record so others can use them.
+        } else {
+            theSkill = angular.copy($scope.pikSkill);
         }
-        $scope.pikSkill='';
-        $scope.newSkill== {
+        $scope.pikSkill = '';
+        $scope.newSkill == {
             name: '',
             tags: []
         };
-        theSkill.yrs=0;
-        $scope.skills.push(theSkill);
+        theSkill.yrs = 0;
+        $scope.person.skills.push(theSkill);
     };
     //FAKE STUFF FOR TEST
     $scope.jobTitles = ['Front-end developer', 'UI/UX Specialist', 'Tank', 'Healer', 'DPS', 'Back-end developer'];

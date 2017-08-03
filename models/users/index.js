@@ -27,23 +27,21 @@ var usrSchema = new mongoose.Schema({
         end:Date,
         cName:String,
         position:String,
-        other:String,
-        loc:String
+        other:String
     }],
     //education. Generally same as above.
     edu:[{
         start:Date,
         end:Date,
         sName:String,
-        degree:String,
+        field:String,
         other:String
     }],
     //other experience
-    exp:[{
+    oth:[{
         start:Date,
         end:Date,
         eName:String,
-        pos:String,
         desc:String
     }]
 }, { collection: 'User' });

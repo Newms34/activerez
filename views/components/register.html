@@ -10,9 +10,9 @@
                 <div class='row'>
                     <div class='input-group col-md-8 col-md-offset-2'>
                         <span class='input-group-addon'>Your Username</span>
-                        <input type="text" placeholder='Pick a username' ng-model='user' class='form-control' ng-change='nameTimer()' required>
+                        <input type="text" placeholder='Pick a username' ng-model='person.user' class='form-control' ng-change='nameTimer()' required>
                     </div>
-                    <div class='alert alert-danger col-md-8 col-md-offset-2' ng-if='nameDup'>Error: It looks like that username is already taken!</div>
+                    <div class='alert alert-danger col-md-8 col-md-offset-2' ng-show='nameDup'>Error: It looks like that username is already taken!</div>
                 </div>
                 <div class='col-md-12'>
                     <br/>
@@ -20,7 +20,7 @@
                 <div class='row'>
                     <div class='input-group col-md-8 col-md-offset-2'>
                         <span class='input-group-addon'>Enter Password</span>
-                        <input type="password" placeholder='Enter a password' ng-model='pwd' class='form-control' required>
+                        <input type="password" placeholder='Enter a password' ng-model='person.pwd' class='form-control' required>
                     </div>
                 </div>
                 <br>
@@ -29,90 +29,102 @@
                         <span class='input-group-addon'>Repeat Password</span>
                         <input type="password" placeholder='Enter password again, just to make sure!' ng-model='pwdDup' class='form-control' required>
                     </div>
-                    <div class='alert alert-danger col-md-8 col-md-offset-2' ng-if='pwd && pwdDup && pwd!=pwdDup'>Error: Your passwords don't match!</div>
+                    <div class='alert alert-danger col-md-8 col-md-offset-2' ng-show='person.pwd && pwdDup && person.pwd!=pwdDup'>Error: Your passwords don't match!</div>
                 </div>
                 <br>
                 <div class='row'>
                     <div class='input-group col-md-8 col-md-offset-2'>
                         <span class='input-group-addon'>Email</span>
-                        <input type="text" placeholder='Enter an email address' ng-model='email' class='form-control' required>
+                        <input type="text" placeholder='Enter an email address' ng-model='person.email' class='form-control' required>
                     </div>
                 </div>
                 <br>
-                <button class='btn btn-info col-md-4 col-md-offset-2' ng-click='noRez=!noRez'><span ng-if='!noRez'>Don't Show Resume Info</span><span ng-if='noRez'>Show Resume Info</span></button>
+                <button class='btn btn-info col-md-4 col-md-offset-2' ng-click='noRez=!noRez'><span ng-show='!noRez'>Don't Show Resume Info</span><span ng-show='noRez'>Show Resume Info</span></button>
                 <div class='col-md-12'>
                     <hr/>
                 </div>
                 <div ng-hide='noRez'>
                     <em class='col-md-12 text-muted'>All following information is optional.</em>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Personal Information <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Personal Information <button ng-click = 'expl(1)' class='btn btn-primary pull-right'>?</button></h4>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2'>
                             <span class='input-group-addon'>First Name</span>
-                            <input type="text" placeholder='Your first name' ng-model='first' class='form-control'>
+                            <input type="text" placeholder='Your first name' ng-model='person.first' class='form-control'>
                         </div>
                     </div>
                     <br>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2'>
                             <span class='input-group-addon'>Last Name</span>
-                            <input type="text" placeholder='Your last name' ng-model='last' class='form-control'>
+                            <input type="text" placeholder='Your last name' ng-model='person.last' class='form-control'>
                         </div>
                     </div>
                     <br>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2'>
                             <span class='input-group-addon'>Phone</span>
-                            <input type="text" placeholder='Your phone number' ng-model='phone' class='form-control'>
+                            <input type="text" placeholder='Your phone number' ng-model='person.phone' class='form-control'>
                         </div>
                     </div>
                     <br>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2'>
                             <span class='input-group-addon'>City</span>
-                            <input type="text" placeholder='Your city (or the nearest one)' ng-model='city' class='form-control'>
+                            <input type="text" placeholder='Your city (or the nearest one)' ng-model='person.city' class='form-control'>
                         </div>
                     </div>
                     <br>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2'>
                             <span class='input-group-addon'>State</span>
-                            <input type="text" placeholder='Your state' ng-model='state' class='form-control'>
+                            <input type="text" placeholder='Your state' ng-model='person.state' class='form-control'>
                         </div>
                     </div>
                     <div class='col-md-12'>
                         <hr/>
                     </div>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>General  Information <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>General  Information <button ng-click = 'expl(2)' class='btn btn-primary pull-right'>?</button></h4>
                     <div class='row'>
                         <div class='input-group col-md-8 col-md-offset-2 big-info'>
                             <span class='input-group-addon'>Summary</span>
-                            <textarea type="text" placeholder='Tell prospective employers a little bit about yourself.' ng-model='first' class='form-control'></textarea>
+                            <textarea type="text" placeholder='Tell prospective employers a little bit about yourself.' ng-model='person.summary' class='form-control'></textarea>
                         </div>
                     </div>
                     <br>
                     <div class='row'>
                         <div class='col-md-offset-2 col-md-8 panel panel-primary panel-body'>
-                            <h4 class='col-md-offset-1'>Job Title</h4>
-                            <div class='row' ng-click='newJobNew=false'>
-                                <div class='input-group col-md-8 col-md-offset-2 med-info' ng-class='{"picked":!newJobNew,"unpicked":newJobNew}'>
-                                    <span class='input-group-addon'>Pick a job title</span>
-                                    <div class='form-control col-md-12'>
-                                        <div class='col-md-3'>Search:</div>
-                                        <input type="text" class='col-md-7' ng-model='jobFilt' placeholder='Filter job titles'>
-                                        <div class='col-md-3'>Job:</div>
-                                        <select ng-model='jobTitle' class='col-md-7' ng-options='jt for jt in jobTitles|filter: jobFilt'></select>
+                            <h4 class='col-md-offset-1'>Position Type</h4>
+                            <div ng-show='titlePicked'>
+                                <h5 class='col-md-offset-1'>{{person.jobTitle}} <button class='btn btn-danger btn-xs' title='Pick again' ng-click='titlePicked=false'>x</button></h5>
+                            </div>
+                            <div ng-show='!titlePicked'>
+                                <div class='row'>
+                                    <div class='col-md-8 col-md-offset-1 text-muted'>Tell us your Position type (i.e., what kind of job you're looking for)</div>
+                                </div>
+                                <div class='row' ng-click='newJobNew=false'>
+                                    <div class='input-group col-md-8 col-md-offset-2 med-info' ng-class='{"picked":!newJobNew,"unpicked":newJobNew}'>
+                                        <span class='input-group-addon'>Pick A Job Title</span>
+                                        <div class='form-control col-md-12'>
+                                            <div class='col-md-3'>Search:</div>
+                                            <input type="text" class='col-md-7' ng-model='jobFilt' placeholder='Filter job titles'>
+                                            <div class='col-md-3'>Job:</div>
+                                            <select ng-model='jobOld' class='col-md-7' ng-options='jt for jt in jobTitles|filter: jobFilt'></select>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <br>
-                            <div class='col-md-3 col-md-offset-5'>
-                                <h5>OR</h5></div>
-                            <br>
-                            <div class='row' ng-click='newJobNew=true'>
-                                <div class='input-group col-md-8 col-md-offset-2' ng-class='{"picked":newJobNew,"unpicked":!newJobNew}'>
-                                    <span class='input-group-addon'>Enter New Job Title</span>
-                                    <input type="text" placeholder='Your job' ng-model='jobNew' class='form-control'>
+                                <br>
+                                <div class='col-md-3 col-md-offset-5'>
+                                    <h5>OR</h5></div>
+                                <br>
+                                <div class='row' ng-click='newJobNew=true'>
+                                    <div class='input-group col-md-8 col-md-offset-2' ng-class='{"picked":newJobNew,"unpicked":!newJobNew}'>
+                                        <span class='input-group-addon'>Enter New Job Title</span>
+                                        <input type="text" placeholder='Your job' ng-model='jobNew' class='form-control'>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class='row'>
+                                    <button class='col-md-4 col-md-offset-4 btn btn-primary' ng-click='pickTitle()'> Pick this one</button>
                                 </div>
                             </div>
                         </div>
@@ -120,25 +132,25 @@
                     <div class='col-md-12'>
                         <hr/>
                     </div>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Work Experience <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Work Experience <button ng-click = 'expl(3)' class='btn btn-primary pull-right'>?</button></h4>
                     <div class='row'>
-                            {{addWorkViz}}
-                        <button class='btn btn-primary col-md-4 col-md-offset-4' ng-if='!addWorkViz' ng-click='$parent.addWorkViz=true;'><i class='fa fa-plus'></i> Add New Work Experience</button>
+                        <button class='btn btn-primary col-md-4 col-md-offset-4' ng-show='!addWorkViz' ng-click='addWorkViz=true;'><i class='fa fa-plus'></i> Add New Work Experience</button>
                     </div>
+                    <br>
                     <div class='row' ng-show='addWorkViz'>
                         <div class='col-md-offset-2 col-md-8 panel panel-primary panel-body'>
                             <h4 class='col-md-offset-2 col-md-8'>New Work Experience</h4>
                             <div class='row'>
                                 <div class='input-group col-md-8 col-md-offset-2'>
                                     <span class='input-group-addon'>Company/Organization</span>
-                                    <input type="text" placeholder='The company you worked for' ng-model='newWork.comp' class='form-control'>
+                                    <input type="text" placeholder='The company you worked for' ng-model='newWork.cName' class='form-control'>
                                 </div>
                             </div>
                             <br>
                             <div class='row'>
                                 <div class='input-group col-md-8 col-md-offset-2'>
                                     <span class='input-group-addon'>Position</span>
-                                    <input type="text" placeholder='The position you held' ng-model='newWork.pos' class='form-control'>
+                                    <input type="text" placeholder='The position you held' ng-model='newWork.position' class='form-control'>
                                 </div>
                             </div>
                             <br>
@@ -158,46 +170,160 @@
                             <br>
                             <div class='row'>
                                 <div class='input-group col-md-8 col-md-offset-2'>
-                                    <span class='input-group-addon'>Description</span>
-                                    <textarea placeholder='Tell us a little about what you did' ng-model='newWork.end' class='form-control big-info'></textarea>
+                                    <span class='input-group-addon'>Description/Other Info</span>
+                                    <textarea placeholder='Other useful info, like what you did, where it was, etc.' ng-model='newWork.other' class='form-control big-info'></textarea>
                                 </div>
                             </div>
                             <br>
                             <div class='row'>
-                                <button class='btn btn-primary col-md-offset-2 col-md-3'><i class='fa fa-plus'></i> Add</button>
-                                <button class='btn btn-info col-md-offset-2 col-md-3'><i class='fa fa-times'></i> Cancel</button>
+                                <button class='btn btn-primary col-md-offset-2 col-md-3' ng-click='pushNewItem("Work")'><i class='fa fa-plus'></i> Add</button>
+                                <button class='btn btn-info col-md-offset-2 col-md-3' ng-click='addWorkViz=false'><i class='fa fa-times'></i> Cancel</button>
                             </div>
                         </div>
                     </div>
-                    <div class='col-md-12'>
-                        <hr/>
-                    </div>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Education <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <!-- Table of JOBS history -->
                     <div class='row'>
-                        <div class='input-group col-md-8 col-md-offset-2 big-info'>
-                            <span class='input-group-addon'>Summary</span>
-                            <textarea type="text" placeholder='Tell prospective employers a little bit about yourself.' ng-model='first' class='form-control'></textarea>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body' ng-show='person.jobs.length'>
+                            <div class='col-md-12' ng-repeat='job in person.jobs'>
+                                <div class='col-md-12'><strong><em>{{job.position}}</em> - {{job.cName}}</strong><span class='pull-right'>{{job.start.toDateString()}} - {{job.end.toDateString()}}</span></div>
+                                <div class='col-md-offset-1'>{{job.other}}</div>
+                            </div>
+                        </div>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body text-center' ng-show='!person.jobs.length'>
+                            <h5>You have not entered any work experience yet.</h5>
                         </div>
                     </div>
                     <div class='col-md-12'>
                         <hr/>
                     </div>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Other Experience <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <!-- EDUCATION -->
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Education <button ng-click = 'expl(4)' class='btn btn-primary pull-right'>?</button></h4>
                     <div class='row'>
-                        <div class='input-group col-md-8 col-md-offset-2 big-info'>
-                            <span class='input-group-addon'>Summary</span>
-                            <textarea type="text" placeholder='Tell prospective employers a little bit about yourself.' ng-model='first' class='form-control'></textarea>
+                        <button class='btn btn-primary col-md-4 col-md-offset-4' ng-show='!addEduViz' ng-click='addEduViz=true;'><i class='fa fa-plus'></i> Add New Education</button>
+                    </div>
+                    <br>
+                    <div class='row' ng-show='addEduViz'>
+                        <div class='col-md-offset-2 col-md-8 panel panel-primary panel-body'>
+                            <h4 class='col-md-offset-2 col-md-8'>New Education</h4>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Name of School</span>
+                                    <input type="text" placeholder='The school you attended' ng-model='newEdu.sName' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Area of Study</span>
+                                    <input type="text" placeholder='The degree and/or field of study' ng-model='newEdu.degree' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Start Date</span>
+                                    <input type="date" placeholder='The date your education program started (or best guess)' ng-model='newEdu.start' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>End Date</span>
+                                    <input type="date" placeholder='The date your education program ended (or best guess)' ng-model='newEdu.end' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Description</span>
+                                    <textarea placeholder='Any other useful information' ng-model='newEdu.other' class='form-control big-info'></textarea>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <button class='btn btn-primary col-md-offset-2 col-md-3'  ng-click='pushNewItem("Edu")'><i class='fa fa-plus'></i> Add</button>
+                                <button class='btn btn-info col-md-offset-2 col-md-3' ng-click='addEduViz=false'><i class='fa fa-times'></i> Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table of EDU history -->
+                    <div class='row'>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body' ng-show='person.edu.length'>
+                            <div class='col-md-12' ng-repeat='edu in person.edu'>
+                                <div class='col-md-12'><strong>{{edu.sName}} - <em>{{edu.field}}</em></strong><span class='pull-right'>{{edu.start.toDateString()}} - {{edu.end.toDateString()}}</span></div>
+                                <div class='col-md-offset-1'>{{edu.other}}</div>
+                            </div>
+                        </div>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body text-center' ng-show='!person.edu.length'>
+                            <h5>You have not entered any education yet.</h5>
                         </div>
                     </div>
                     <div class='col-md-12'>
                         <hr/>
                     </div>
-                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Add Skills <button ng-click = 'expl(0)' class='btn btn-primary pull-right'>?</button></h4>
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Other Experience <button ng-click = 'expl(5)' class='btn btn-primary pull-right'>?</button></h4>
+                    <div class='row'>
+                        <button class='btn btn-primary col-md-4 col-md-offset-4' ng-show='!addOthViz' ng-click='addOthViz=true;'><i class='fa fa-plus'></i> Add New Other Experience</button>
+                    </div>
+                    <br>
+                    <div class='row' ng-show='addOthViz'>
+                        <div class='col-md-offset-2 col-md-8 panel panel-primary panel-body'>
+                            <h4 class='col-md-offset-2 col-md-8'>New Other Experience</h4>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Name of Organization</span>
+                                    <input type="text" placeholder='The organization' ng-model='newOth.eName' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Start Date</span>
+                                    <input type="date" placeholder='The date your position started (or best guess)' ng-model='newOth.start' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>End Date</span>
+                                    <input type="date" placeholder='The date your position ended (or best guess)' ng-model='newOth.end' class='form-control'>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <div class='input-group col-md-8 col-md-offset-2'>
+                                    <span class='input-group-addon'>Description</span>
+                                    <textarea placeholder='What you did there' ng-model='newOth.other' class='form-control big-info'></textarea>
+                                </div>
+                            </div>
+                            <br>
+                            <div class='row'>
+                                <button class='btn btn-primary col-md-offset-2 col-md-3' ng-click='pushNewItem("Oth")'><i class='fa fa-plus'></i> Add</button>
+                                <button class='btn btn-info col-md-offset-2 col-md-3' ng-click='addEduViz=false'><i class='fa fa-times'></i> Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table of OTHER history -->
+                    <div class='row'>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body' ng-show='person.oth.length'>
+                            <div class='col-md-12' ng-repeat='oth in person.oth'>
+                                <div class='col-md-12'><strong>{{oth.eName}}</strong><span class='pull-right'>{{oth.start.toDateString()}} - {{oth.end.toDateString()}}</span></div>
+                                <div class='col-md-offset-1'>{{oth.other}}</div>
+                            </div>
+                        </div>
+                        <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body text-center' ng-show='!person.oth.length'>
+                            <h5>You have not entered any other experiences yet.</h5>
+                        </div>
+                    </div>
+                    <div class='col-md-12'>
+                        <hr/>
+                    </div>
+                    <h4 class='col-md-offset-2 col-md-8 alert reg-grp'>Specific Skills <button ng-click = 'expl(6)' class='btn btn-primary pull-right'>?</button></h4>
                     <div class='row'>
                         <div class='col-md-offset-2 col-md-8 panel panel-primary panel-body'>
                             <h4 class='col-md-offset-1'>New Skill</h4>
                             <div class='row'>
-                                <div class='input-group col-md-8 col-md-offset-2 big-info' ng-click='newSkNew=false' ng-class='{"picked":!newSkNew,"unpicked":newSkNew}'>
+                                <div class='input-group col-md-8 col-md-offset-2 med-info' ng-click='newSkNew=false' ng-class='{"picked":!newSkNew,"unpicked":newSkNew}'>
                                     <span class='input-group-addon'>Pick a skill</span>
                                     <div class='form-control col-md-12'>
                                         <div class='col-md-3'>Search:</div>
@@ -238,7 +364,7 @@
                         </div>
                     </div>
                     <hr>
-                    <table class='table' ng-show='skills.length'>
+                    <table class='table' ng-show='person.skills.length'>
                         <thead>
                             <tr>
                                 <th colspan='3'>
@@ -253,7 +379,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat='sk in skills'>
+                            <tr ng-repeat='sk in person.skills'>
                                 <td>
                                     {{sk.name}}
                                 </td>
@@ -266,7 +392,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body' ng-if='!skills.length'>
+                    <div class='col-md-8 col-md-offset-2 panel panel-primary panel-body' ng-show='!person.skills.length'>
                         <h4 class='col-md-offset-1'>No Skills</h4>
                         <div>
                             You haven't added any skills yet! Add some skills to make it easier for professionals to find you.
