@@ -6,7 +6,6 @@ var router = express.Router(),
     async = require('async'),
     mongoose = require('mongoose');
     
-module.exports = function(io) {
     router.use('/user', require('./subroutes/users'));
     router.use('/skills', require('./subroutes/skills'));
     router.use('/tags', require('./subroutes/tags'));
@@ -16,5 +15,5 @@ module.exports = function(io) {
     router.use(function(req, res) {
         res.status(404).end();
     });
-    return router;
-};
+
+module.exports = router;
