@@ -8,7 +8,9 @@ var router = express.Router(),
 
 
 router.get('/all', function(req, res, next) {
+	console.log('trying to get all skills')
     mongoose.model('Skills').find({}, function(err, all) {
+    	console.log('err?',err,'resp?',all)
         res.send(all);
     })
 })
