@@ -75,6 +75,69 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
         })
 }]);
 
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      })
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
+    $transitions.onBefore({ to: 'app.**' }, function(trans) {
+        var def = $q.defer();
+        console.log('TRANS',trans)
+        var usrCheck = trans.injector().get('userFact')
+        usrCheck.getUser().then(function(r) {
+            console.log(r.result)
+            if (r.result) {
+                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
+                def.resolve(true)
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }))
+            }
+        });
+        return def.promise;
+    });
+    // $transitions.onFinish({ to: '*' }, function() {
+    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
+    // });
+}]);
+app.factory('userFact', function($http) {
+    return {
+        makeGroup: function() {
+            //do stuff
+        },
+        getDefaultLoc: function() {
+            return $http.get('//freegeoip.net/json/').then(function(r) {
+                return r.data;
+            })
+        },
+        getUser: function() {
+            return $http.get('/user/chkLog').then(function(s) {
+                console.log('getUser in fac says:', s)
+                return s.data;
+            })
+        }
+    };
+});
+
 app.controller('chat-cont', function($scope, userFact, $http, $state, $sce) {
     $scope.user = null;
     userFact.getUser().then(function(r) {
@@ -239,19 +302,18 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         name: '',
         tags: []
     };
-    $scope.pushNewItem = (t)=>{
-        if(t=='Work'){
+    $scope.pushNewItem = (t) => {
+        if (t == 'Work') {
             $scope.person.jobs.push(angular.copy($scope.newWork));
             $scope.newWork = {}
+        } else {
+            var lc = t.toLowerCase();
+            console.log('pushing into', $scope.person[lc])
+            $scope.person[lc].push(angular.copy($scope['new' + t]));
+            $scope['new' + t] = {};
+            console.log('result', $scope.person[lc])
         }
-        else{
-            var lc=t.toLowerCase();
-            console.log('pushing into',$scope.person[lc])
-            $scope.person[lc].push(angular.copy($scope['new'+t]));
-            $scope['new'+t] = {};
-            console.log('result',$scope.person[lc])
-        }
-        $scope['add'+t+'Viz']=false;
+        $scope['add' + t + 'Viz'] = false;
     }
     $scope.pickTitle = () => {
         if ($scope.newJobNew) {
@@ -291,7 +353,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             bootbox.alert("Please enter your username and password.");
             return false;
         } else {
-            $http.post('/user/login', { name: $scope.user, pass: $scope.pwd }).then(function(resp) {
+            $http.post('/user/login', { user: $scope.user, pwd: $scope.pwd }).then(function(resp) {
                 if (!resp.data || resp.data == 'no') {
                     bootbox.alert('Invalid username or password!', function() {
                         $scope.pwd = '';
@@ -334,7 +396,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             //first, check if anything's invalid
             bootbox.alert('One or more of your fields is missing. Please double-check your information!');
             return false;
-        } else if ($scope.pwd != $scope.pwdDup) {
+        } else if ($scope.person.pwd != $scope.pwdDup) {
             bootbox.alert('Your passwords don&rsquo;t match!')
         } else if ($scope.nameDup) {
             bootbox.alert('Someone&rsquo;s already using this username. Please pick another one!')
@@ -345,15 +407,21 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     };
     $scope.doReg = function() {
         //TEMPORARY SHORT CIRCUIT
-        console.log('FULL PERSON OBJ:',$scope.person);
-        return false;
+        console.log('FULL PERSON OBJ:', $scope.person);
+        if ($scope.skillsToRecord.length) {
+            console.log('NEW SKILLS TO BACK:',$scope.skillsToRecord)
+            $http.post('/skills/addBulk', {user:$scope.person.user,skills:$scope.skillsToRecord})
+                .then((sk) => {
+                    $scope.allSkills = sk.data;
+                });
+        }
         $http.post('/user/new', $scope.person).then(function(r) {
             if (r.data == 'err') {
                 bootbox.alert('There was an issue registering! Sorry about that!');
             } else {
-                bootbox.alert('Welcome to ActiveRez, ' + $scope.fname + '!', function() {
+                bootbox.alert('Welcome to ActiveRez, ' + $scope.person.first + '!', function() {
 
-                    $http.post('/user/login', { name: $scope.user, pass: $scope.pwd }).then(function(resp) {
+                    $http.post('/user/login', { user: $scope.person.user, pwd: $scope.person.pwd }).then(function(resp) {
                         if (!resp.data || resp.data == 'no') {
                             bootbox.alert('You have successfully registered, but there was a login error!', function() {
                                 $state.go('appSimp.login')
@@ -392,19 +460,26 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         if ($scope.newSkNew) {
             //adding new skill
             theSkill = angular.copy($scope.newSkill);
-            $scope.skillsToRecord.push(angular.copy(theSkill));//add this to a list of brand-new skills we'll need to record so others can use them.
+            $scope.skillsToRecord.push(angular.copy(theSkill)); //add this to a list of brand-new skills we'll need to record so others can use them.
         } else {
             theSkill = angular.copy($scope.pikSkill);
         }
+        if ($scope.person.skills.indexOf(theSkill.name) > -1) {
+            //this skill already added. Don't add again!
+            return false;
+        }
         $scope.pikSkill = '';
-        $scope.newSkill == {
+        $scope.newSkill = {
             name: '',
             tags: []
         };
         theSkill.yrs = 0;
         $scope.person.skills.push(theSkill);
     };
-    //FAKE STUFF FOR TEST
+    $scope.removeSkill = (n) => {
+            $scope.person.skills.slice(n, 1);
+        }
+        //FAKE STUFF FOR TEST
     $scope.jobTitles = ['Front-end developer', 'UI/UX Specialist', 'Tank', 'Healer', 'DPS', 'Back-end developer'];
 
 });
@@ -432,61 +507,18 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         } //stuff to hide dashboard els
     $scope.refUsr = function() {
         userFact.getUser().then(function(r) {
-            $scope.user = r.user;
-
-            //FAKE DATA FOR TESTING
-            $scope.user.work = [{
-                start: new Date('1/2/1934'),
-                end: new Date('5/6/1978'),
-                cName: 'ABC Widgets',
-                position: "Widget Midget",
-                loc: 'Citysville, Townland',
-                other: 'Made widgets with digits.'
-            }];
-
-            $scope.user.edu = [{
-                start: new Date('5/3/01'),
-                end: new Date('5/6/03'),
-                sName: 'School of Funk',
-                degree: "PhD in Awesomeness",
-                other: 'Learned how to be funky'
-            }]
-
-            $scope.skillList = [{
-                name: `HTML`,
-                desc: `Hypertext Markup Language`
-            }, {
-                name: `CSS`,
-                desc: `Cascading Style Sheets`
-            }, {
-                name: `JS`,
-                desc: `JavaScript`
-            }, {
-                name: `AngularJS`,
-                desc: `Front-end library`
-            }, {
-                name: `NodeJS`,
-                desc: `Back-end JavaScript Runtime Environment`
-            }, {
-                name: `Bootstrap`,
-                desc: `CSS Framework`
-            }, {
-                name: `jQuery`,
-                desc: `Isn't actually that bad.`
-            }]
-            $scope.user.skills = [{
-                id: 0,
-                yrs: 10
-            }, {
-                id: 2,
-                yrs: 6
-            }, {
-                id: 3,
-                yrs: 4
-            }];
-            
-            //END FAKE DATA
-            $scope.$digest();
+            $http.get('/skills/all').then((rs) => {
+                r.user.skills.forEach((m) => {
+                    m.id = 0;
+                    for(var i=0;i<rs.data.length;i++){
+                        if(m.name==rs.data[i].name){
+                            m.id=i;
+                        }
+                    }
+                });
+                $scope.user = r.user;
+                $scope.skillList = rs.data;
+            })
         });
     };
     $scope.refUsr();
@@ -519,65 +551,3 @@ resetApp.controller('reset-contr',function($scope,$http){
 		}
 	}
 })
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      })
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
-    $transitions.onBefore({ to: 'app.**' }, function(trans) {
-        var def = $q.defer();
-        console.log('TRANS',trans)
-        var usrCheck = trans.injector().get('userFact')
-        usrCheck.getUser().then(function(r) {
-            console.log(r.result)
-            if (r.result) {
-                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
-                def.resolve(true)
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }))
-            }
-        });
-        return def.promise;
-    });
-    // $transitions.onFinish({ to: '*' }, function() {
-    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
-    // });
-}]);
-app.factory('userFact', function($http) {
-    return {
-        makeGroup: function() {
-            //do stuff
-        },
-        getDefaultLoc: function() {
-            return $http.get('//freegeoip.net/json/').then(function(r) {
-                return r.data;
-            })
-        },
-        getUser: function() {
-            return $http.get('/user/chkLog').then(function(s) {
-                console.log('getUser in fac says:', s)
-                return s.data;
-            })
-        }
-    };
-});

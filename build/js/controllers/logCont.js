@@ -11,19 +11,18 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         name: '',
         tags: []
     };
-    $scope.pushNewItem = (t)=>{
-        if(t=='Work'){
+    $scope.pushNewItem = (t) => {
+        if (t == 'Work') {
             $scope.person.jobs.push(angular.copy($scope.newWork));
             $scope.newWork = {}
+        } else {
+            var lc = t.toLowerCase();
+            console.log('pushing into', $scope.person[lc])
+            $scope.person[lc].push(angular.copy($scope['new' + t]));
+            $scope['new' + t] = {};
+            console.log('result', $scope.person[lc])
         }
-        else{
-            var lc=t.toLowerCase();
-            console.log('pushing into',$scope.person[lc])
-            $scope.person[lc].push(angular.copy($scope['new'+t]));
-            $scope['new'+t] = {};
-            console.log('result',$scope.person[lc])
-        }
-        $scope['add'+t+'Viz']=false;
+        $scope['add' + t + 'Viz'] = false;
     }
     $scope.pickTitle = () => {
         if ($scope.newJobNew) {
@@ -63,7 +62,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             bootbox.alert("Please enter your username and password.");
             return false;
         } else {
-            $http.post('/user/login', { name: $scope.user, pass: $scope.pwd }).then(function(resp) {
+            $http.post('/user/login', { user: $scope.user, pwd: $scope.pwd }).then(function(resp) {
                 if (!resp.data || resp.data == 'no') {
                     bootbox.alert('Invalid username or password!', function() {
                         $scope.pwd = '';
@@ -106,7 +105,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             //first, check if anything's invalid
             bootbox.alert('One or more of your fields is missing. Please double-check your information!');
             return false;
-        } else if ($scope.pwd != $scope.pwdDup) {
+        } else if ($scope.person.pwd != $scope.pwdDup) {
             bootbox.alert('Your passwords don&rsquo;t match!')
         } else if ($scope.nameDup) {
             bootbox.alert('Someone&rsquo;s already using this username. Please pick another one!')
@@ -117,14 +116,21 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     };
     $scope.doReg = function() {
         //TEMPORARY SHORT CIRCUIT
-        console.log('FULL PERSON OBJ:',$scope.person);
+        console.log('FULL PERSON OBJ:', $scope.person);
+        if ($scope.skillsToRecord.length) {
+            console.log('NEW SKILLS TO BACK:',$scope.skillsToRecord)
+            $http.post('/skills/addBulk', {user:$scope.person.user,skills:$scope.skillsToRecord})
+                .then((sk) => {
+                    $scope.allSkills = sk.data;
+                });
+        }
         $http.post('/user/new', $scope.person).then(function(r) {
             if (r.data == 'err') {
                 bootbox.alert('There was an issue registering! Sorry about that!');
             } else {
-                bootbox.alert('Welcome to ActiveRez, ' + $scope.fname + '!', function() {
+                bootbox.alert('Welcome to ActiveRez, ' + $scope.person.first + '!', function() {
 
-                    $http.post('/user/login', { name: $scope.user, pass: $scope.pwd }).then(function(resp) {
+                    $http.post('/user/login', { user: $scope.person.user, pwd: $scope.person.pwd }).then(function(resp) {
                         if (!resp.data || resp.data == 'no') {
                             bootbox.alert('You have successfully registered, but there was a login error!', function() {
                                 $state.go('appSimp.login')
@@ -163,19 +169,26 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
         if ($scope.newSkNew) {
             //adding new skill
             theSkill = angular.copy($scope.newSkill);
-            $scope.skillsToRecord.push(angular.copy(theSkill));//add this to a list of brand-new skills we'll need to record so others can use them.
+            $scope.skillsToRecord.push(angular.copy(theSkill)); //add this to a list of brand-new skills we'll need to record so others can use them.
         } else {
             theSkill = angular.copy($scope.pikSkill);
         }
+        if ($scope.person.skills.indexOf(theSkill.name) > -1) {
+            //this skill already added. Don't add again!
+            return false;
+        }
         $scope.pikSkill = '';
-        $scope.newSkill == {
+        $scope.newSkill = {
             name: '',
             tags: []
         };
         theSkill.yrs = 0;
         $scope.person.skills.push(theSkill);
     };
-    //FAKE STUFF FOR TEST
+    $scope.removeSkill = (n) => {
+            $scope.person.skills.slice(n, 1);
+        }
+        //FAKE STUFF FOR TEST
     $scope.jobTitles = ['Front-end developer', 'UI/UX Specialist', 'Tank', 'Healer', 'DPS', 'Back-end developer'];
 
 });

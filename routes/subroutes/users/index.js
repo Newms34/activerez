@@ -42,33 +42,10 @@ router.post('/sendMsg', function(req, res, next) {
         });
     }
 });
-router.post('/delMsg', function(req, res, next) {
-    //user deletes an old message by user and id.
-    if (!req.session || !req.session.user || req.session.user.name != req.body.user) {
-        res.send('err');
-    } else {
-        mongoose.model('User').findOne({ 'name': req.body.user }, function(err, usr) {
-            if (!usr || err) {
-                res.send('err');
-            } else {
-                for (var i = 0; i < usr.msgs.length; i++) {
-                    if (usr.msgs[i].id == req.body.id) {
-                        usr.msgs.splice(i, 1);
-                        break;
-                    }
-                }
-                usr.save(function(err, usr) {
-                    req.session.user = usr;
-                    res.send(usr);
-                })
-            }
-        })
-    }
-});
 router.get('/usrData/:name', function(req, res, next) {
     mongoose.model('User').findOne({ 'name': req.params.name }, function(err, usr) {
         console.log('found:', usr)
-        delete req.session.user.pass;
+        delete req.session.user.pwd;
         delete req.session.user.salt;
         delete req.session.user.reset;
         delete req.session.user.msgs;
@@ -83,10 +60,12 @@ router.post('/new', function(req, res, next) {
             //Should we check for req.session?
             res.send('err')
         } else {
-            var pwd = req.body.pass,
+            var pwd = req.body.pwd.toString(),
                 um = mongoose.model('User');
-            delete req.body.pass;
-            console.log(req.body)
+            delete req.body.pwd;
+            req.body.skills = req.body.skills.map((sk)=>{
+                return {name: sk.name, yrs: sk.yrs};
+            })
             um.register(new um(req.body), pwd, function(err, usr) {
                 console.log(err, usr)
                 if (err) {
@@ -112,11 +91,14 @@ router.get('/nameOkay/:name', function(req, res, next) {
     });
 });
 router.post('/login', function(req, res, next) {
-    mongoose.model('User').findOne({ 'name': req.body.name }, function(err, usr) {
+    mongoose.model('User').findOne({ 'user': req.body.user }, function(err, usr) {
         if (!usr || err) {
+            console.log('USER',req.body.user,'NOT FOUND!')
             res.send(false);
         } else {
-            usr.authenticate(req.body.pass, function(err, resp) {
+            console.log('authing user',req.body)
+            usr.authenticate(req.body.pwd, function(err, resp) {
+                console.log('respose for above user is',resp)
                 if (resp && req.session) {
                     req.session.user = resp;
                 }
@@ -131,7 +113,7 @@ router.get('/chkLog', function(req, res, next) {
     if (testMode) {
         res.send({ result: true, user: 'TEST' })
     } else if (req.session && req.session.user) {
-        delete req.session.user.pass;
+        delete req.session.user.pwd;
         delete req.session.user.salt;
         delete req.session.user.reset;
         //we don't wanna send those!

@@ -241,7 +241,7 @@
                             </div>
                             <br>
                             <div class='row'>
-                                <button class='btn btn-primary col-md-offset-2 col-md-3'  ng-click='pushNewItem("Edu")'><i class='fa fa-plus'></i> Add</button>
+                                <button class='btn btn-primary col-md-offset-2 col-md-3' ng-click='pushNewItem("Edu")'><i class='fa fa-plus'></i> Add</button>
                                 <button class='btn btn-info col-md-offset-2 col-md-3' ng-click='addEduViz=false'><i class='fa fa-times'></i> Cancel</button>
                             </div>
                         </div>
@@ -339,25 +339,47 @@
                             </div>
                             <br>
                             <br>
-                            <div class='row'>
-                                <div class='input-group col-md-8 col-md-offset-2 huge-info' ng-click='newSkNew=true' ng-class='{"picked":newSkNew,"unpicked":!newSkNew}'>
+                            <!-- <div class='row'> -->
+                                <div class='col-md-8 col-md-offset-2 ' ng-click='newSkNew=true' ng-class='{"picked":newSkNew,"unpicked":!newSkNew}'>
                                     <span class='input-group-addon'>Add a new skill</span>
-                                    <div class='form-control col-md-12'>
-                                        <div class='col-md-3'>Skill:</div>
-                                        <input type="text" class='col-md-9' ng-model='newSkill.name' placeholder='New skill name' ng-change='newSkill.tags=[]'>
-                                        <hr>
-                                        <em class='col-md-12'>And add some tags.</em>
-                                        <br>
-                                        <br>
-                                        <div class='col-md-2'>Tag:</div>
-                                        <select ng-model='newSkillTag' class='col-md-6' ng-options='tg.name as tg.name for tg in tags'></select>
-                                        <button class='col-md-offset-1 col-md-3 btn btn-primary' ng-click='addTag();'><i class='fa fa-plus'></i> Add</button>
-                                        <div class='btn btn-xs btn-primary' ng-repeat='tag in newSkill.tags' ng-click='removeTag($index);'>
-                                            {{tag.name}}
-                                        </div>
+                                    <div class='input-group form-control col-md-12'>
+                                        <!-- <ol> -->
+                                            <div class='row col-md-12'>
+                                                <div class='col-md-12'>
+                                                    1. <em>Give your skill a name.</em>
+                                                </div>
+                                                <div class='col-md-3'>Skill:</div>
+                                                <input type="text" class='col-md-9' ng-model='newSkill.name' placeholder='New skill name' ng-change='newSkill.tags=[]'>
+                                            </div>
+                                            <hr class='col-md-12'>
+                                            <div class='row col-md-12'>
+                                                <div class='col-md-12'>
+                                                    2. <em>And how about a nice description?</em>
+                                                </div>
+                                                <div class='col-md-3'>Tag:</div>
+                                                <input type="text" ng-model='newSkill.desc'>
+                                            </div>
+                                            <hr class='col-md-12'>
+                                            <div class='row col-md-12'>
+                                                <div class='col-md-12'>
+                                                    3. <em>Now add some tags!</em>
+                                                </div>
+                                                <div class='col-md-12'>
+                                                    <div class='col-md-3'>Tag:</div>
+                                                    <select ng-model='newSkillTag' class='col-md-6' ng-options='tg.name as tg.name for tg in tags'></select>
+                                                    <button class='col-md-offset-1 col-md-3 btn btn-primary' ng-click='addTag();'><i class='fa fa-plus'></i> Add</button>
+                                                </div>
+                                                <div class='col-md-12'>
+                                                    <button class='btn btn-xs btn-primary' ng-repeat='tag in newSkill.tags' ng-click='removeTag($index);'>
+                                                        {{tag.name}}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <hr class='col-md-12'>
+                                        <!-- </ol> -->
                                     </div>
                                 </div>
-                            </div>
+                            <!-- </div> -->
                             <div class='row'>
                                 <button ng-click='addSkill()' class='btn btn-primary col-md-4 col-md-offset-4'><i class='fa fa-plus'></i> Add Skill</button>
                             </div>
@@ -388,6 +410,9 @@
                                 </td>
                                 <td>
                                     <input type="number" min=0 step='.5' ng-model='sk.yrs'>
+                                </td>
+                                <td>
+                                    <button class='btn btn-danger' title='Remove skill' ng-click='removeSkill($index)'>x</button>
                                 </td>
                             </tr>
                         </tbody>

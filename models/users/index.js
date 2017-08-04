@@ -3,10 +3,10 @@ var mongoose = require('mongoose'),
     passportLocalMongoose =  require('passport-local-mongoose');
 
 var usrSchema = new mongoose.Schema({
-    name: String, //(user)name of the user,
+    user: String, //(user)name of the user,
     first:String, //first name, for things
     last:String,//last name, for more things
-    pass: String,
+    pwd: String,
     salt: String,
     jobTitle:String,
     creationDate:Date,
@@ -18,7 +18,7 @@ var usrSchema = new mongoose.Schema({
     summary:String,//self-written summary of user, 
     //skills, each with an (optional!) number of yrs experience
     skills:[{
-        id:String,
+        name:String,
         yrs:Number
     }],
     //work, with start, end, position,company name. "other" is used for any additonal info that might be relevant.
@@ -43,12 +43,13 @@ var usrSchema = new mongoose.Schema({
         end:Date,
         eName:String,
         desc:String
-    }]
+    }],
+    lastLogin:Date
 }, { collection: 'User' });
 
 usrSchema.plugin(passportLocalMongoose,{
-    usernameField:'name',
-    hashField:'pass',
+    usernameField:'user',
+    hashField:'pwd',
     lastLoginField:'lastLogin'
 });
 mongoose.model('User', usrSchema);
