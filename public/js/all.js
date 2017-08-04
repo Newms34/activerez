@@ -1,5 +1,5 @@
 var socket = io(),
-    app = angular.module('ribbon-app', ['ui.router', 'ngAnimate', 'ui.bootstrap','ngSanitize']),
+    app = angular.module('ribbon-app', ['ui.router', 'ngAnimate', 'ui.bootstrap','ngSanitize','chart.js']),
     resetApp = angular.module('reset-app',[]);
 
 Array.prototype.findUser = function(u) {
@@ -23,30 +23,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             url: '/', //default route, if not 404
             templateUrl: 'components/dash.html'
         })
-        .state('app.inbox', {
-            url: '/inbox',
-            templateUrl: 'components/inbox.html'
-        })
-        .state('app.group', {
-            url: '/group',
-            abstract: true,
-            template: '<ui-view></ui-view>'
-        })
-        .state('app.group.my', {
-            url: '/my',
-            templateUrl: 'components/group/my.html'
-        })
-        .state('app.group.list', {
-            url: '/list',
-            templateUrl: 'components/group/list.html'
-        })
-        // .state('app.group.sg', {
-        //     url: '/sg',
-        //     templateUrl: 'components/group/sg.html'
-        // })
-        .state('app.group.create', {
-            url: '/create',
-            templateUrl: 'components/group/create.html'
+        .state('app.find', {
+            url: '/find',
+            templateUrl: 'components/find.html'
         })
         .state('app.help', {
             url: '/help',
@@ -289,6 +268,48 @@ app.controller('chat-cont', function($scope, userFact, $http, $state, $sce) {
     })
 })
 
+app.controller('find-ctrl', function($scope, userFact, $http) {
+    $scope.srchMode = 0;
+    $scope.topics = [{
+        name: 'Name',
+        icon: 'user',
+        desc: 'Find a user by name'
+    }, {
+        name: 'Skill',
+        icon: 'cogs',
+        desc: 'Find a user by one of their skills'
+    }, {
+        name: 'Tag',
+        icon: 'tag',
+        desc: 'Find a user by one of the tags on their skills'
+    }];
+    $scope.t = null;
+    $scope.users = [];
+    $scope.searchTimer = ()=>{
+    	if($scope.t){
+    		clearTimeout($scope.t)
+    	}
+    	$scope.t = setTimeout(function(){
+    		if($scope.srchMode===0){
+    			//name mode
+    			$http.get('/user/allUsrs').then(function(r){
+    				$scope.users = r.data.filter((u)=>{
+    					return u.first.toLowerCase().indexOf($scope.searchParam.toLowerCase())>-1 || u.last.toLowerCase().indexOf($scope.searchParam.toLowerCase())>-1;
+    				});
+    			})
+    		}else if($scope.srchMode===1){
+    			$http.get('/user/bySkill/'+$scope.searchParam).then((r)=>{
+    				$scope.users = r;
+    			})
+    		}else{
+    			$http.get('/user/byTag/'+$scope.searchParam).then((r)=>{
+    				$scope.users = r;
+    			})
+    		}
+    	},500)
+    }
+});
+
 app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     $scope.person = {
         jobs: [],
@@ -392,6 +413,12 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     });
 
     $scope.reg = function() {
+        var noDur = [];
+        for (var i=0;i<$scope.person.skills.length;i++){
+            if(!$scope.person.skills[i].yrs){
+                noDur.push($scope.person.skills[i].name);
+            }
+        }
         if (!$scope.regForm.$valid) {
             //first, check if anything's invalid
             bootbox.alert('One or more of your fields is missing. Please double-check your information!');
@@ -400,7 +427,16 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             bootbox.alert('Your passwords don&rsquo;t match!')
         } else if ($scope.nameDup) {
             bootbox.alert('Someone&rsquo;s already using this username. Please pick another one!')
-        } else {
+        } else if(noDur.length){
+            bootbox.confirm({
+                message:`The following skills have their Years of Experience set to zero!<br/><ul><li>${noDur.join('</li><li>')}</li></ul><br/>We'd recommend either increasing the years of experience to at least 0.5 (half a year), or removing the skill. Are you sure you want to continue?`,
+                callback:function(r){
+                    if(r){
+                        $scope.doReg();
+                    }
+                }
+            });
+        }else{
             //everything checks out!
             $scope.doReg();
         }

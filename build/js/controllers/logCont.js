@@ -101,6 +101,12 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     });
 
     $scope.reg = function() {
+        var noDur = [];
+        for (var i=0;i<$scope.person.skills.length;i++){
+            if(!$scope.person.skills[i].yrs){
+                noDur.push($scope.person.skills[i].name);
+            }
+        }
         if (!$scope.regForm.$valid) {
             //first, check if anything's invalid
             bootbox.alert('One or more of your fields is missing. Please double-check your information!');
@@ -109,7 +115,16 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
             bootbox.alert('Your passwords don&rsquo;t match!')
         } else if ($scope.nameDup) {
             bootbox.alert('Someone&rsquo;s already using this username. Please pick another one!')
-        } else {
+        } else if(noDur.length){
+            bootbox.confirm({
+                message:`The following skills have their Years of Experience set to zero!<br/><ul><li>${noDur.join('</li><li>')}</li></ul><br/>We'd recommend either increasing the years of experience to at least 0.5 (half a year), or removing the skill. Are you sure you want to continue?`,
+                callback:function(r){
+                    if(r){
+                        $scope.doReg();
+                    }
+                }
+            });
+        }else{
             //everything checks out!
             $scope.doReg();
         }

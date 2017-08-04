@@ -1,5 +1,5 @@
 var socket = io(),
-    app = angular.module('ribbon-app', ['ui.router', 'ngAnimate', 'ui.bootstrap','ngSanitize']),
+    app = angular.module('ribbon-app', ['ui.router', 'ngAnimate', 'ui.bootstrap','ngSanitize','chart.js']),
     resetApp = angular.module('reset-app',[]);
 
 Array.prototype.findUser = function(u) {
@@ -23,30 +23,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             url: '/', //default route, if not 404
             templateUrl: 'components/dash.html'
         })
-        .state('app.inbox', {
-            url: '/inbox',
-            templateUrl: 'components/inbox.html'
-        })
-        .state('app.group', {
-            url: '/group',
-            abstract: true,
-            template: '<ui-view></ui-view>'
-        })
-        .state('app.group.my', {
-            url: '/my',
-            templateUrl: 'components/group/my.html'
-        })
-        .state('app.group.list', {
-            url: '/list',
-            templateUrl: 'components/group/list.html'
-        })
-        // .state('app.group.sg', {
-        //     url: '/sg',
-        //     templateUrl: 'components/group/sg.html'
-        // })
-        .state('app.group.create', {
-            url: '/create',
-            templateUrl: 'components/group/create.html'
+        .state('app.find', {
+            url: '/find',
+            templateUrl: 'components/find.html'
         })
         .state('app.help', {
             url: '/help',

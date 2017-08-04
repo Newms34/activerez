@@ -43,15 +43,69 @@ router.post('/sendMsg', function(req, res, next) {
     }
 });
 router.get('/usrData/:name', function(req, res, next) {
+    if (!req.session || !req.session.user || !req.session.user.user || req.session.user.user != req.params.name) {
+        res.send('no'); //auth err!
+    }
     mongoose.model('User').findOne({ 'name': req.params.name }, function(err, usr) {
         console.log('found:', usr)
-        delete req.session.user.pwd;
-        delete req.session.user.salt;
-        delete req.session.user.reset;
-        delete req.session.user.msgs;
+        delete usr.pwd;
+        delete usr.salt;
         res.send(usr);
     });
 });
+router.get('/allUsrs', function(req, res, next) {
+    mongoose.model('User').find({}, function(err, usrs) {
+        usrs = usrs.map((us) => {
+            delete us.salt;
+            delete us.pwd;
+            delete us.user;
+            return us;
+        });
+        res.send(usrs);
+    })
+})
+router.get('/byTag/:tag', function(req, res, next) {
+    //we're sent a particular tag (like 'Front-end')
+    mongoose.model('Skills').find({}, function(serr, sk) {
+        mongoose.model('Users').find({}, function(uerr, usrs) {
+            //first, filter skills list by tag
+            sk = sk.filter((s) => {
+                sk.tags.indexOf(req.params.tag) > -1;
+            })
+            usrs = usrs.filter((u) => {
+                var incl = false;
+                u.skills.forEach((usk) => {
+                    if (sk.indexOf(usk) > -1) {
+                        incl = true;
+                    }
+                });
+                return incl;
+            });
+            usrs = usrs.map((us) => {
+                delete us.salt;
+                delete us.pwd;
+                delete us.user;
+                return us;
+            })
+            res.send(usrs);
+        });
+    });
+});
+router.get('/bySkill/:skill', function(req, res, next) {
+    var reg = new RegExp(req.params.skill,'i')
+    mongoose.model('User').find({skills: {$elemMatch:{name:reg}} }, function(err, usrs) {
+        if (usrs) {
+            usrs = usrs.map((us) => {
+                delete us.salt;
+                delete us.pwd;
+                delete us.user;
+                return us;
+            });
+        }
+        console.log(err,usrs)
+        res.send(usrs);
+    })
+})
 router.post('/new', function(req, res, next) {
     //record new user
     mongoose.model('User').findOne({ 'name': req.body.user }, function(err, usr) {
@@ -63,8 +117,8 @@ router.post('/new', function(req, res, next) {
             var pwd = req.body.pwd.toString(),
                 um = mongoose.model('User');
             delete req.body.pwd;
-            req.body.skills = req.body.skills.map((sk)=>{
-                return {name: sk.name, yrs: sk.yrs};
+            req.body.skills = req.body.skills.map((sk) => {
+                return { name: sk.name, yrs: sk.yrs };
             })
             um.register(new um(req.body), pwd, function(err, usr) {
                 console.log(err, usr)
@@ -93,12 +147,12 @@ router.get('/nameOkay/:name', function(req, res, next) {
 router.post('/login', function(req, res, next) {
     mongoose.model('User').findOne({ 'user': req.body.user }, function(err, usr) {
         if (!usr || err) {
-            console.log('USER',req.body.user,'NOT FOUND!')
+            console.log('USER', req.body.user, 'NOT FOUND!')
             res.send(false);
         } else {
-            console.log('authing user',req.body)
+            console.log('authing user', req.body)
             usr.authenticate(req.body.pwd, function(err, resp) {
-                console.log('respose for above user is',resp)
+                console.log('respose for above user is', resp)
                 if (resp && req.session) {
                     req.session.user = resp;
                 }

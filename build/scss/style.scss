@@ -4,7 +4,7 @@ body {
     margin: 0;
     height: 100%;
     padding-top: 40px;
-    background:url('../img/bg.jpg');
+    background: url('../img/bg.jpg');
     background-attachment: fixed;
     & #main-box {
         width: 95%;
@@ -12,7 +12,7 @@ body {
         left: 2.5%;
         min-height: 100vh;
         padding: 10px;
-        background: #fff;
+        // background: #fff;
         &.ng-enter {
             /* transition on enter for .5s */
             transition: 2s;
@@ -90,10 +90,10 @@ label {
     background: #565679;
     color: #fff;
     border-radius: 2px;
-    width:15%;
-    display:inline-block;
-    text-align:center;
-    margin-right:3px;
+    width: 15%;
+    display: inline-block;
+    text-align: center;
+    margin-right: 3px;
 }
 
 .med-info {
@@ -119,4 +119,18 @@ label {
 
 .unpicked {
     opacity: .5;
+}
+
+.tab-row {
+    padding: 0;
+    margin:0;
+    .tab {
+        text-align: center;
+        height: 50px;
+        line-height:50px;
+        cursor:pointer;
+        &.active-tab{
+            background:#204D74;
+        }
+    }
 }
