@@ -134,3 +134,17 @@ label {
         }
     }
 }
+
+.deet-bg{
+    position:fixed;
+    z-index:99;
+    background:rgba(0,0,0,0.5);
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    & > .panel{
+        position:relative;
+        top:60px;
+    }
+}

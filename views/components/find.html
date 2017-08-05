@@ -1,56 +1,91 @@
-<div class='panel panel-primary' ng-controller='find-ctrl' style='min-height:80vh;'>
-    <div class='panel-heading'>
-        <h4>Find Users</h4>
-    </div>
-    <div class='col-md-12 row tab-row'>
-        <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==0}" ng-click='srchMode=0'>By Name</div>
-        <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==1}" ng-click='srchMode=1'>By Skill</div>
-        <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==2}" ng-click='srchMode=2'>By Tag</div>
-    </div>
-    <div class='panel-body'>
-        <hr>
-        <h4 class='col-md-offset-1 col-md-8 alert reg-grp'>Resume Search</h4>
-        <div class='col-md-8 col-md-offset-1'>
-            <h4>{{topics[srchMode].desc}}</h4>
+<div ng-controller='find-ctrl'>
+    <div class='panel panel-primary' style='min-height:80vh;'>
+        <div class='panel-heading'>
+            <h4>Find Users</h4>
         </div>
-        <br>
-        <br>
-        <div class='row'>
-            <div class='input-group col-md-8 col-md-offset-1'>
-                <span class='input-group-addon'><i class='fa fa-{{topics[srchMode].icon}}'></i></span>
-                <input type="text" placeholder='Enter a {{topics[srchMode].name}}' ng-model='searchParam' class='form-control' ng-change='searchTimer()'>
+        <div class='col-md-12 row tab-row'>
+            <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==0}" ng-click='srchMode=0'>By Name</div>
+            <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==1}" ng-click='srchMode=1'>By Skill</div>
+            <div class='col-md-4 btn-primary tab' ng-class="{'active-tab':srchMode==2}" ng-click='srchMode=2'>By Tag</div>
+        </div>
+        <div class='panel-body'>
+            <hr>
+            <h4 class='col-md-offset-1 col-md-8 alert reg-grp'>Resume Search</h4>
+            <div class='col-md-8 col-md-offset-1'>
+                <h4>{{topics[srchMode].desc}}</h4>
+            </div>
+            <br>
+            <br>
+            <div class='row'>
+                <div class='input-group col-md-8 col-md-offset-1'>
+                    <span class='input-group-addon'><i class='fa fa-{{topics[srchMode].icon}}'></i></span>
+                    <input type="text" placeholder='Enter a {{topics[srchMode].name}}' ng-model='searchParam' class='form-control' ng-change='searchTimer()'>
+                </div>
+            </div>
+            <br>
+            <div class='col-md-12'>
+                <hr>
+            </div>
+            <div class='col-md-12 alert-info' ng-if='!users.length'>
+                Search for some users above!
+            </div>
+            <table class='table col-md-12' ng-show='users.length'>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Title</th>
+                        <th>Skills</th>
+                        <th>Location</th>
+                        <th>More Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat='u in users'>
+                        <td><a href="mailto:{{u.email}}">{{u.first}} {{u.last}}</a></td>
+                        <td>{{u.jobTitle}}</td>
+                        <td>
+                            <div class='col-md-12' ng-repeat='sk in u.skills'><i class='fa fa-check'></i> {{sk.name}}</div>
+                        </td>
+                        <td>{{u.city}}, {{u.state}}</td>
+                        <td>
+                            <button class='btn btn-primary btn-sm' ng-click='deetUser=$index;$parent.deetUser=$index;makeChtData();'><i class='fa fa-line-chart' title='Click for more information on this user.'></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div ng-show='deetUser>-1' class='deet-bg'>
+        <div class='col-md-10 col-md-offset-1 panel panel-info'>
+            <div class='panel-heading' style='min-height:50px'>
+                <h4 class='col-md-8'>Information on {{users[deetUser].first}} {{users[deetUser].last}}</h4>
+                <button class='btn btn-info btn-xs pull-right' ng-click='deetUser=-1'>x</button>
+            </div>
+            <div class='panel-body'>
+                <div class='col-md-4'>
+                    <strong class='col-md-offset-1'>Pick a Chart Type!</strong>
+                    <br>
+                    <br>
+                    <div class='input-group col-md-10 col-md-offset-1'>
+                        <span class='input-group-addon'><i class='fa fa-pie-chart'></i></span>
+                        <select ng-init='chartFmt=chartTypes[0];' class='form-control' ng-options='ct as ct.name for ct in chartTypes' ng-model='chartFmt' ng-change='makeChtData()'></select>
+                    </div>
+                    <br>
+                    <div class='col-md-10 col-md-offset-1 text-muted'><strong>Explanation:</strong><br>{{chartFmt.msg}}</div>
+                    <div ng-show='chartFmt.id==2' class='panel panel-primary panel-body'>
+                        <hr>
+                        <div class='input-group col-md-10 col-md-offset-1'>
+                            <span class='input-group-addon'>Add Skill</span>
+                            <select class='form-control' ng-options='ns as ns.name for ns in users[deetUser].skills' ng-model='newChtSkill'></select>
+                        </div>
+                        <br>
+                        <button class='col-md-10 col-md-offset-1 btn btn-primary' ng-click='customAddSkill()'><i class='fa fa-plus'></i> Add</button>
+                    </div>
+                </div>
+                <div class='col-md-7' style='min-height:150px;min-width:170px;'>
+                    <canvas class="chart chart-pie" chart-data="cht.data" chart-labels="cht.labels" chart-legend="true" chart-options="cht.options" chart-colors="cht.colors" height="370"></canvas>
+                </div>
             </div>
         </div>
-        <br>
-        <div class='row'>
-            <button class='btn btn-primary col-md-4 col-md-offset-1'><i class='fa fa-search'></i> Search</button>
-        </div>
-        <div class='col-md-12'>
-            <hr>
-        </div>
-        <table class='table col-md-12'>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Title</th>
-                    <th>Skills</th>
-                    <th>Location</th>
-                    <th>More Info</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat='u in users'>
-                    <td><a href="mailto:{{u.email}}">{{u.first}} {{u.last}}</a></td>
-                    <td>{{u.jobTitle}}</td>
-                    <td>
-                        <div class='col-md-12' ng-repeat='sk in u.skills'><i class='fa fa-check'></i> {{sk.name}}</div>
-                    </td>
-                    <td>{{u.city}}, {{u.state}}</td>
-                    <td>
-                        <button class='btn btn-primary btn-sm'><i class='fa fa-pie-chart' title='Click for more information on this user.'></i></button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>

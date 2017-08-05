@@ -139,6 +139,8 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                     $scope.allSkills = sk.data;
                 });
         }
+        $scope.person.work = angular.copy($scope.person.jobs);
+        // return false;
         $http.post('/user/new', $scope.person).then(function(r) {
             if (r.data == 'err') {
                 bootbox.alert('There was an issue registering! Sorry about that!');
