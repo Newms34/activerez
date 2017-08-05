@@ -180,12 +180,12 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
                 })
             } else if ($scope.srchMode === 1) {
                 $http.get('/user/bySkill/' + $scope.searchParam).then((r) => {
-                    $scope.users = r;
+                    $scope.users = r.data;
                     $scope.deetUser = -1;
                 })
             } else {
                 $http.get('/user/byTag/' + $scope.searchParam).then((r) => {
-                    $scope.users = r;
+                    $scope.users = r.data;
                     $scope.deetUser = -1;
                 })
             }

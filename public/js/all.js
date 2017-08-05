@@ -54,6 +54,69 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
         })
 }]);
 
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      })
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
+    $transitions.onBefore({ to: 'app.**' }, function(trans) {
+        var def = $q.defer();
+        console.log('TRANS',trans)
+        var usrCheck = trans.injector().get('userFact')
+        usrCheck.getUser().then(function(r) {
+            console.log(r.result)
+            if (r.result) {
+                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
+                def.resolve(true)
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }))
+            }
+        });
+        return def.promise;
+    });
+    // $transitions.onFinish({ to: '*' }, function() {
+    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
+    // });
+}]);
+app.factory('userFact', function($http) {
+    return {
+        makeGroup: function() {
+            //do stuff
+        },
+        getDefaultLoc: function() {
+            return $http.get('//freegeoip.net/json/').then(function(r) {
+                return r.data;
+            })
+        },
+        getUser: function() {
+            return $http.get('/user/chkLog').then(function(s) {
+                console.log('getUser in fac says:', s)
+                return s.data;
+            })
+        }
+    };
+});
+
 app.controller('chat-cont', function($scope, userFact, $http, $state, $sce) {
     $scope.user = null;
     userFact.getUser().then(function(r) {
@@ -387,12 +450,12 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
                 })
             } else if ($scope.srchMode === 1) {
                 $http.get('/user/bySkill/' + $scope.searchParam).then((r) => {
-                    $scope.users = r;
+                    $scope.users = r.data;
                     $scope.deetUser = -1;
                 })
             } else {
                 $http.get('/user/byTag/' + $scope.searchParam).then((r) => {
-                    $scope.users = r;
+                    $scope.users = r.data;
                     $scope.deetUser = -1;
                 })
             }
@@ -681,65 +744,3 @@ resetApp.controller('reset-contr',function($scope,$http){
 		}
 	}
 })
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      })
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
-    $transitions.onBefore({ to: 'app.**' }, function(trans) {
-        var def = $q.defer();
-        console.log('TRANS',trans)
-        var usrCheck = trans.injector().get('userFact')
-        usrCheck.getUser().then(function(r) {
-            console.log(r.result)
-            if (r.result) {
-                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
-                def.resolve(true)
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }))
-            }
-        });
-        return def.promise;
-    });
-    // $transitions.onFinish({ to: '*' }, function() {
-    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
-    // });
-}]);
-app.factory('userFact', function($http) {
-    return {
-        makeGroup: function() {
-            //do stuff
-        },
-        getDefaultLoc: function() {
-            return $http.get('//freegeoip.net/json/').then(function(r) {
-                return r.data;
-            })
-        },
-        getUser: function() {
-            return $http.get('/user/chkLog').then(function(s) {
-                console.log('getUser in fac says:', s)
-                return s.data;
-            })
-        }
-    };
-});
