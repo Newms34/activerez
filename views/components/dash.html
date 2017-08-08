@@ -19,7 +19,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>Password</i></span>
                         <div class='form-control text-muted'>(hidden)</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("pwd")'><i class='fa fa-pencil-square-o'/i> Edit</i></span>
                     </div>
                 </div>
                 <br>
@@ -27,7 +27,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>Email</i></span>
                         <div class='form-control'>{{user.email}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("email")'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
                     </div>
                 </div>
             </div>
@@ -42,13 +42,13 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>First Name</span>
                         <div class='form-control'>{{user.first}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("first")'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
                     </div>
                     <br>
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>Last Name</span>
                         <div class='form-control'>{{user.last}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("last")'><i class='fa fa-pencil-square-o'</i> Edit</i></span>
                     </div>
                 </div>
                 <br>
@@ -57,7 +57,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>City</i></span>
                         <div class='form-control'>{{user.city}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("city")'><i class='fa fa-pencil-square-o'</i> Edit</i></span>
                     </div>
                 </div>
                 <br>
@@ -65,7 +65,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>State</i></span>
                         <div class='form-control'>{{user.state}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("state")'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
                     </div>
                 </div>
                 <br>
@@ -73,7 +73,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>Phone</i></span>
                         <div class='form-control'>{{user.phone||'Unspecified'}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("phone")'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
                     </div>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     <div class='input-group col-md-8 col-md-offset-1 big-info'>
                         <span class='input-group-addon'>Summary</span>
                         <div class='form-control'>{{user.summary||'No summary yet!'}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("summary")'><i class='fa fa-pencil-square-o')'></i> Edit</i></span>
                     </div>
                 </div>
                 <br>
@@ -95,7 +95,7 @@
                     <div class='input-group col-md-8 col-md-offset-1'>
                         <span class='input-group-addon'>Job Title</i></span>
                         <div class='form-control'>{{user.jobTitle||'Unspecified'}}</div>
-                        <span class='btn btn-primary input-group-addon'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("jobTitle")'><i class='fa fa-pencil-square-o'></i> Edit</i></span>
                     </div>
                 </div>
             </div>
@@ -105,21 +105,23 @@
             <h4 class='col-md-12 col-md-offset-1'>Work Experience</h4>
             <button class='btn btn-primary pull-right' ng-click='hidden.work=!hidden.work'>x</button>
             <div ng-hide='hidden.work'>
-            <div class='col-md-10 col-md-offset-1 alert-danger no-xp' ng-if='!user.work||!user.work.length'>No work experience entered
-                <br><br>
+                <div class='col-md-10 col-md-offset-1 alert-danger no-xp' ng-if='!user.work||!user.work.length'>No work experience entered
+                    <br>
+                    <br>
                 </div>
                 <div class='panel exp panel-info panel-body col-md-10 col-md-offset-1' ng-repeat='wk in user.work'>
                     <div class='pull-right' style='margin: 5px'>
-                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px'><i class='fa fa-pencil-square-o'></i> Edit</button>
+                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px' ng-click='editField("work",$index)'><i class='fa fa-pencil-square-o'></i> Edit</button>
                         <br>
-                        <button class='btn btn-info btn-xs'><i class='fa fa-times'></i> Remove</button>
+                        <button class='btn btn-info btn-xs' ng-click='removeItem("work",$index)'><i class='fa fa-times'></i> Remove</button>
                     </div>
                     <span class='exp-place'>{{wk.cName}} - 
                         <span class='pos'>{{wk.position}}</span>
                     </span>
-                    <span class='pull-right'>{{wk.start.getMonth()+1}}/{{wk.start.getFullYear()}} - {{wk.end.getMonth()+1}}/{{wk.end.getFullYear()}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(wk.start)}} - {{moAndYr(wk.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{wk.other}}</div>
-                </div><br>
+                </div>
+                <br>
                 <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Work Experience</button>
             </div>
             <div class='col-md-12'>
@@ -129,20 +131,22 @@
             <button class='btn btn-primary pull-right' ng-click='hidden.edu=!hidden.edu'>x</button>
             <div ng-hide='hidden.edu'>
                 <div class='col-md-10 col-md-offset-1 alert-danger no-xp' ng-if='!user.edu||!user.edu.length'>No education entered
-                <br><br>
+                    <br>
+                    <br>
                 </div>
                 <div class='panel exp panel-info panel-body col-md-10 col-md-offset-1' ng-repeat='ed in user.edu'>
                     <div class='pull-right' style='margin: 5px'>
-                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px'><i class='fa fa-pencil-square-o'></i> Edit</button>
+                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px' ng-click='editField("edu",$index)'><i class='fa fa-pencil-square-o'></i> Edit</button>
                         <br>
-                        <button class='btn btn-info btn-xs'><i class='fa fa-times'></i> Remove</button>
+                        <button class='btn btn-info btn-xs' ng-click='removeItem("edu",$index)'><i class='fa fa-times'></i> Remove</button>
                     </div>
                     <span class='exp-place'>{{ed.sName}} - 
                         <span class='pos'>{{ed.degree}}</span>
                     </span>
-                    <span class='pull-right'>{{ed.start.getMonth()+1}}/{{ed.start.getFullYear()}} - {{ed.end.getMonth()+1}}/{{ed.end.getFullYear()}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(ed.start)}} - {{moAndYr(ed.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{ed.other}}</div>
-                </div><br>
+                </div>
+                <br>
                 <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Education</button>
             </div>
             <div class='col-md-12'>
@@ -152,23 +156,24 @@
             <button class='btn btn-primary pull-right' ng-click='hidden.exp=!hidden.exp'>x</button>
             <div ng-hide='hidden.exp'>
                 <div class='col-md-10 col-md-offset-1 alert-danger no-xp' ng-if='!user.exp||!user.exp.length'>No other experience entered
-                <br><br>
+                    <br>
+                    <br>
                 </div>
                 <div class='panel exp panel-info panel-body col-md-10 col-md-offset-1' ng-repeat='oe in user.exp'>
                     <div class='pull-right' style='margin: 5px'>
-                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px'><i class='fa fa-pencil-square-o'></i> Edit</button>
+                        <button class='btn btn-primary btn-xs' style='margin-bottom: 5px' ng-click='editField("exp",$index)'><i class='fa fa-pencil-square-o'></i> Edit</button>
                         <br>
-                        <button class='btn btn-info btn-xs'><i class='fa fa-times'></i> Remove</button>
+                        <button class='btn btn-info btn-xs' ng-click='removeItem("oth",$index)'><i class='fa fa-times'></i> Remove</button>
                     </div>
                     <span class='exp-place'>{{oe.eName}} - 
                         <span class='pos'>{{oe.pos}}</span>
                     </span>
-                    <span class='pull-right'>{{oe.start.getMonth()+1}}/{{oe.start.getFullYear()}} - {{oe.end.getMonth()+1}}/{{oe.end.getFullYear()}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(oe.start)}} - {{moAndYr(oe.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{oe.desc}}</div>
-                </div><br>
+                </div>
+                <br>
                 <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Miscellaneous Experience</button>
             </div>
-
             <div class='col-md-12'>
                 <hr/>
             </div>
@@ -191,8 +196,9 @@
                             <td>{{sk.yrs}}</td>
                             <td>{{skillList[sk.id].desc}}</td>
                             <td>
-                                <button class='btn btn-xs btn-primary'><i class='fa fa-pencil-square-o'></i> Edit</button><br>
-                                <button class='btn btn-xs btn-info'><i class='fa fa-times'></i> Remove</button>
+                                <button class='btn btn-xs btn-primary'><i class='fa fa-pencil-square-o'></i> Edit</button>
+                                <br>
+                                <button class='btn btn-xs btn-info' ng-click='removeItem("skills",$index)'><i class='fa fa-times'></i> Remove</button>
                             </td>
                         </tr>
                     </tbody>

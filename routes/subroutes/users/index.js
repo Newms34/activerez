@@ -92,8 +92,8 @@ router.get('/byTag/:tag', function(req, res, next) {
     });
 });
 router.get('/bySkill/:skill', function(req, res, next) {
-    var reg = new RegExp(req.params.skill,'i')
-    mongoose.model('User').find({skills: {$elemMatch:{name:reg}} }, function(err, usrs) {
+    var reg = new RegExp(req.params.skill, 'i')
+    mongoose.model('User').find({ skills: { $elemMatch: { name: reg } } }, function(err, usrs) {
         if (usrs) {
             usrs = usrs.map((us) => {
                 delete us.salt;
@@ -102,7 +102,7 @@ router.get('/bySkill/:skill', function(req, res, next) {
                 return us;
             });
         }
-        console.log(err,usrs)
+        console.log(err, usrs)
         res.send(usrs);
     })
 })
@@ -152,12 +152,12 @@ router.post('/login', function(req, res, next) {
         } else {
             console.log('authing user', req.body)
             usr.authenticate(req.body.pwd, function(err, resp) {
-                console.log('respose for above user is', resp)
+                console.log('response for above user is', resp)
                 if (resp && req.session) {
                     req.session.user = resp;
                 }
                 res.send(resp)
-            })
+            });
         }
     })
 });
@@ -179,6 +179,26 @@ router.get('/chkLog', function(req, res, next) {
         res.send({ result: false });
     }
 });
+router.post('/editGeneral', function(req, res, next) {
+    //first, check credentials
+    console.log('USER:', req.session.user, req.session.user.user)
+    if (req.session.user.user != req.body.user) {
+        res.send('err');
+    } else {
+        var update = {};
+        update[req.body.field] = req.body.new;
+        mongoose.model('User').update({ user: req.body.user }, update, function(err, resp) {
+            console.log('err', err, 'resp', resp)
+            mongoose.model('User').findOne({ user: req.body.user }, function(uerr, usr) {
+                if (err) {
+                    res.send('err')
+                } else {
+                    res.send(usr);
+                }
+            })
+        })
+    }
+});
 router.get('/logout', function(req, res, next) {
     /*this function logs out the user. It has no confirmation stuff because
     1) this is on the backend
@@ -189,6 +209,64 @@ router.get('/logout', function(req, res, next) {
     req.session.destroy();
     res.send('logged');
 });
+
+router.post('/editList', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            console.log('err?',err)
+            usr[req.body.cat][req.body.n] = req.body.data;
+            usr.save(function(err, doc) {
+                res.send(doc);
+            })
+        });
+    }
+})
+router.post('/removeListItem',function(req,res,next){
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            usr[req.body.cat].splice(req.body.n,1);
+            usr.save(function(err, doc) {
+                res.send(doc);
+            })
+        });
+    }
+})
+
+router.post('/editPwd', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            if (err) {
+                res.send('err');
+            } else {
+                console.log('usr before set:', usr)
+                var oldPwd = usr.pwd;
+                usr.authenticate(req.body.old, function(aerr, ausr) {
+                    console.log('response for above user is', ausr)
+                    if (aerr) {
+                        //most likely user entered wrong pwd.
+                        res.send('err');
+                    } else {
+                        usr.setPassword(req.body.new, function(err) {
+                            console.log('usr after set:', usr, 'err is', aerr, 'newpwdErr', err)
+                            usr.save(function(err, fusr) {
+                                console.log('old', oldPwd, 'new', fusr.pwd)
+                                delete fusr.salt;
+                                delete fusr.pwd;
+                                res.send(fusr);
+                            });
+                        });
+                    }
+                });
+            }
+        })
+    }
+})
 
 router.post('/forgot', function(req, res, next) {
     //user enters password, requests reset email
