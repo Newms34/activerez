@@ -118,11 +118,11 @@
                     <span class='exp-place'>{{wk.cName}} - 
                         <span class='pos'>{{wk.position}}</span>
                     </span>
-                    <span class='pull-right'>{{moAndYr(wk.start)}} - {{moAndYr(wk.end)}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(wk.start)}} - {{wk.current?'current':moAndYr(wk.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{wk.other}}</div>
                 </div>
                 <br>
-                <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Work Experience</button>
+                <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='addListItem("work")'><i class='fa fa-plus'></i> Add Work Experience</button>
             </div>
             <div class='col-md-12'>
                 <hr/>
@@ -143,11 +143,11 @@
                     <span class='exp-place'>{{ed.sName}} - 
                         <span class='pos'>{{ed.degree}}</span>
                     </span>
-                    <span class='pull-right'>{{moAndYr(ed.start)}} - {{moAndYr(ed.end)}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(ed.start)}} - {{ed.current?'current':moAndYr(ed.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{ed.other}}</div>
                 </div>
                 <br>
-                <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Education</button>
+                <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='addListItem("edu")'><i class='fa fa-plus'></i> Add Education</button>
             </div>
             <div class='col-md-12'>
                 <hr/>
@@ -168,11 +168,11 @@
                     <span class='exp-place'>{{oe.eName}} - 
                         <span class='pos'>{{oe.pos}}</span>
                     </span>
-                    <span class='pull-right'>{{moAndYr(oe.start)}} - {{moAndYr(oe.end)}}</span>&nbsp;
+                    <span class='pull-right'>{{moAndYr(oe.start)}} - {{oe.current?'current':moAndYr(oe.end)}}</span>&nbsp;
                     <div class='col-md-offset-1'>{{oe.desc}}</div>
                 </div>
                 <br>
-                <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Miscellaneous Experience</button>
+                <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='addListItem("exp")'><i class='fa fa-plus'></i> Add Miscellaneous Experience</button>
             </div>
             <div class='col-md-12'>
                 <hr/>

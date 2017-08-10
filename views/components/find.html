@@ -32,23 +32,24 @@
             <table class='table col-md-12' ng-show='users.length'>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Title</th>
-                        <th>Skills</th>
-                        <th>Location</th>
-                        <th>More Info</th>
+                        <th><i class='fa fa-user'></i> Name</th>
+                        <th><i class='fa fa-briefcase'></i> Title</th>
+                        <th><i class='fa fa-cogs'></i> Skills</th>
+                        <th><i class='fa fa-globe'></i> Location</th>
+                        <th><i class='fa fa-cubes'></i> Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat='u in users'>
-                        <td><a href="mailto:{{u.email}}">{{u.first}} {{u.last}}</a></td>
+                        <td>{{u.first}} {{u.last}}</td>
                         <td>{{u.jobTitle}}</td>
                         <td>
                             <div class='col-md-12' ng-repeat='sk in u.skills'><i class='fa fa-check'></i> {{sk.name}}</div>
                         </td>
                         <td>{{u.city}}, {{u.state}}</td>
                         <td>
-                            <button class='btn btn-primary btn-sm' ng-click='deetUser=$index;$parent.deetUser=$index;makeChtData();'><i class='fa fa-line-chart' title='Click for more information on this user.'></i></button>
+                            <button class='btn btn-primary btn-sm' ng-click='deetUser=$index;$parent.deetUser=$index;makeChtData();' title='Click for more information on this user.'><i class='fa fa-line-chart'></i></button>
+                            <a href="mailto:{{u.email}}" class='btn btn-primary btn-sm' title='Click to email this user.'><i class='fa fa-envelope-o'></i></a>
                         </td>
                     </tr>
                 </tbody>

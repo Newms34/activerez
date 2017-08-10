@@ -678,11 +678,113 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         var nd = new Date(d);
         return `${nd.getMonth()+1}/${nd.getFullYear()}`;
     };
-    $scope.removeItem=(t,n)=>{
-
+    $scope.removeItem = (t, n) => {
+        bootbox.confirm({
+            title: `Remove ${$scope.efl[t]}`,
+            message: 'Are you sure you want to delete this ${$scope.efl[t]}?',
+            callback: (a) => {
+                if (a) {
+                    $http.post('/user/removeListItem', {
+                        user: $scope.user,
+                        cat: t,
+                        n: n
+                    })
+                }
+            }
+        })
+    }
+    $scope.addCat = {
+        work: [{
+            n: 'start',
+            desc: 'Start Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'end',
+            desc: 'End Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'cName',
+            desc: 'Company/Organization',
+            t: 'reg'
+        }, {
+            n: 'Position',
+            desc: 'Position',
+            t: 'reg'
+        }, {
+            n: 'other',
+            desc: 'Description',
+            t: 'ta'
+        }, {
+            n: 'current',
+            desc: 'Current Company',
+            t: 'cb'
+        }],
+        edu: [{
+            n: 'start',
+            desc: 'Start Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'end',
+            desc: 'End Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'sName',
+            desc: 'Name of School',
+            t: 'reg'
+        }, {
+            n: 'field',
+            desc: 'Area of Study',
+            t: 'reg'
+        }, {
+            n: 'other',
+            desc: 'Description',
+            t: 'ta'
+        }, {
+            n: 'current',
+            desc: 'Currently Attending',
+            t: 'cb'
+        }],
+        exp: [{
+            n: 'start',
+            desc: 'Start Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'end',
+            desc: 'End Date (or best guess)',
+            t: 'reg'
+        }, {
+            n: 'eName',
+            desc: 'Name of Organization',
+            t: 'reg'
+        }, {
+            n: 'other',
+            desc: 'Description',
+            t: 'ta'
+        }, {
+            n: 'current',
+            desc: 'Ongoing',
+            t: 'cb'
+        }]
+    }
+    $scope.addListItem = (t) => {
+        console.log(t)
+        var msg = `Enter information for a new ${$scope.efl[t].toLowerCase()}. `;
+        for (var i = 0; i < $scope.addCat[t].length; i++) {
+            if ($scope.addCat[t][i].t == 'reg') {
+                msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${$scope.addCat[t][i].desc}</span><input type='text' class='form-control' id='new-${$scope.addCat[t][i].n}'></div></div><br>`;
+            } else if ($scope.addCat[t][i].t == 'ta') {
+                msg += `<div class='row col-md-offset-1 big-info'><div class='input-group col-md-8'><span class='input-group-addon'>${$scope.addCat[t][i].desc}</span><textarea class='form-control' id='new-${$scope.addCat[t][i].n}'></textarea></div></div><br>`;
+            } else if ($scope.addCat[t][i].t == 'cb') {
+                msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${$scope.addCat[t][i].desc}</span><input type='checkbox' class='form-control' id='new-${$scope.addCat[t][i].n}'></div></div><br>`;
+            }
+        }
+        bootbox.dialog({
+            title: `Add New ${$scope.efl[t]}`,
+            message: msg
+        })
     }
     $scope.editField = function(n, p) {
-        console.log('N', n)
+        console.log('N', n,'P',p)
         if (n == 'pwd') {
             //password field; special case
             bootbox.dialog({
@@ -728,6 +830,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                 inps = [];
             console.log(keys, whichItem);
             for (var i = 0; i < keys.length; i++) {
+                console.log('Key is',keys[i])
                 if (keys[i] == 'start' || keys[i] == 'end') {
                     //date!
                     var nd = new Date(whichItem[keys[i]]),
@@ -744,11 +847,15 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                     }
                     msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
                     inps.push(`${keys[i]}`)
-                } else if (keys[i] != '_id' && keys[i] != '$$hashKey' && keys[i] !== 'other') {
+                } else if (keys[i] != '_id' && keys[i] != '$$hashKey' && keys[i] !== 'other' && keys[i]!=='current') {
                     msg += `<div class='row col-md-offset-1'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><input type='text' class='form-control' id='new-${keys[i]}' value='${whichItem[keys[i]]}'></div></div>`;
                     inps.push(`${keys[i]}`)
                 } else if (keys[i] == 'other') {
                     msg += `<div class='row col-md-offset-1 big-info'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><textarea class='form-control' id='new-${keys[i]}'>${whichItem[keys[i]]}</textarea></div></div>`;
+                    inps.push(`${keys[i]}`)
+                }else if (keys[i] == 'current') {
+                    // var isChecked
+                    msg += `<div class='row col-md-offset-1 '><div class='input-group col-md-11'><span class='input-group-addon'><input type='checkbox' id='new-${keys[i]}' ${whichItem[keys[i]]?"checked":""}></span><div class='form-control'>Ongoing</div></div></div>`;
                     inps.push(`${keys[i]}`)
                 }
             }
@@ -763,8 +870,13 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                         callback: () => {
                             data = {};
                             inps.forEach((dat) => {
-                                data[dat] = $('#new-' + dat).val();
+                                if (dat!='current'){   
+                                    data[dat] = $('#new-' + dat).val();
+                                }else{
+                                    data[dat] = $('#new-'+dat).prop('checked');
+                                }
                             });
+                            console.log(data);
                             $http.post('/user/editList', {
                                 user: $scope.user.user,
                                 n: p || 0,

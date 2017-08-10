@@ -27,7 +27,8 @@ var usrSchema = new mongoose.Schema({
         end:Date,
         cName:String,
         position:String,
-        other:String
+        other:String,
+        current:{type:Boolean, default:false}//if true, this forces us to essentially ignore the 'end' value
     }],
     //education. Generally same as above.
     edu:[{
@@ -35,14 +36,16 @@ var usrSchema = new mongoose.Schema({
         end:Date,
         sName:String,
         field:String,
-        other:String
+        other:String,
+        current:{type:Boolean, default:false}//if true, this forces us to essentially ignore the 'end' value
     }],
     //other experience
     oth:[{
         start:Date,
         end:Date,
         eName:String,
-        desc:String
+        desc:String,
+        current:{type:Boolean, default:false}//if true, this forces us to essentially ignore the 'end' value
     }],
     lastLogin:Date
 }, { collection: 'User' });
