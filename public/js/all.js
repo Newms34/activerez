@@ -325,32 +325,40 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
             $scope.cht.labels = ['Add skills by selecting them to the left.'];
             $scope.cht.data[0] = [1];
         } else {
-            $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((gr) => {
-                console.log(gr.data.map((x) => { return x.name }))
-                $scope.cht.labels = ['unknown'];
-                $scope.cht.data[0] = [0];
-                for (var i = 0; i < gr.data.length; i++) {
-                    console.log(i, gr.data[i].language)
-                    if (!gr.data[i].language || gr.data[i].language == null) {
-                        $scope.cht.data[0][0]++;
-                    } else {
+            if (!$scope.users[$scope.deetUser].github) {
+                bootbox.alert('This user has not entered a github username!', function() {
+                    $scope.chartFmt = $scope.chartTypes[0];
+                    $scope.makeChtData();
+                })
+            } else {
 
-                        if ($scope.cht.labels.indexOf(gr.data[i].language) < 0) {
-                            $scope.cht.labels.push(gr.data[i].language);
-                            $scope.cht.data[0].push(1)
+                $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((gr) => {
+                    console.log(gr.data.map((x) => { return x.name }))
+                    $scope.cht.labels = ['unknown'];
+                    $scope.cht.data[0] = [0];
+                    for (var i = 0; i < gr.data.length; i++) {
+                        console.log(i, gr.data[i].language)
+                        if (!gr.data[i].language || gr.data[i].language == null) {
+                            $scope.cht.data[0][0]++;
                         } else {
-                            $scope.cht.data[0][$scope.cht.labels.indexOf(gr.data[i].language)]++;
+
+                            if ($scope.cht.labels.indexOf(gr.data[i].language) < 0) {
+                                $scope.cht.labels.push(gr.data[i].language);
+                                $scope.cht.data[0].push(1)
+                            } else {
+                                $scope.cht.data[0][$scope.cht.labels.indexOf(gr.data[i].language)]++;
+                            }
                         }
                     }
-                }
-                $scope.cht.labels.push($scope.cht.labels.shift())
-                $scope.cht.data[0].push($scope.cht.data[0].shift())
-                for (var lbl in skillNums) {
-                    $scope.cht.labels.push(lbl);
-                    $scope.cht.data[0].push(skillNums[lbl]);
-                }
-                $scope.doColors();
-            })
+                    $scope.cht.labels.push($scope.cht.labels.shift())
+                    $scope.cht.data[0].push($scope.cht.data[0].shift())
+                    for (var lbl in skillNums) {
+                        $scope.cht.labels.push(lbl);
+                        $scope.cht.data[0].push(skillNums[lbl]);
+                    }
+                    $scope.doColors();
+                })
+            };
         }
         if ($scope.chartFmt.id < 2) {
             for (var lbl in skillNums) {
