@@ -52,6 +52,14 @@
                     </div>
                 </div>
                 <br>
+                <div class='row'>
+                    <div class='input-group col-md-8 col-md-offset-1'>
+                        <span class='input-group-addon'>Github Username (optional)</i></span>
+                        <div class='form-control'>{{user.github}}</div>
+                        <span class='btn btn-primary input-group-addon' ng-click='editField("github")'><i class='fa fa-pencil-square-o'</i> Edit</i></span>
+                    </div>
+                </div>
+                <br>
                 <h5 class='col-md-4 col-md-offset-1'>Location</h5>
                 <div class='row'>
                     <div class='input-group col-md-8 col-md-offset-1'>
@@ -204,6 +212,34 @@
                     </tbody>
                 </table>
                 <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Skill</button>
+            </div>
+        </div>
+    </div>
+    <div class='deet-bg' ng-show='editObj.title'>
+        <div class='panel panel-primary col-md-8 col-md-offset-2'>
+            <div class='panel-heading'>Edit {{editObj.title}}</div>
+            <div class='panel-body'>
+                <div class='row col-md-offset-1' ng-repeat='it in editObj.items' ng-class="{'big-info':it.t=='ta'}">
+                    <div class='input-group col-md-8' ng-if='it.t=="reg"'>
+                        <span class='input-group-addon'>{{it.d}}</span>
+                        <input type='text' class='form-control' ng-model='it.val'>
+                    </div>
+                    <div class='input-group col-md-8' ng-if='it.t=="date" && (it.sn=="start"||!editObj.curr)'>
+                        <span class='input-group-addon'>{{it.d}}</span>
+                        <input type='date' class='form-control' ng-model='it.val'>
+                    </div>
+                    <div class='input-group col-md-8' ng-if='it.t=="cb"'>
+                        <span class='input-group-addon'><input type='checkbox' ng-model='editObj.curr'></span>
+                        <div class='form-control'>{{it.d}}</div>
+                    </div>
+                    <div class='input-group col-md-8' ng-if='it.t=="ta"'>
+                        <span class='input-group-addon'>{{it.d}}</span>
+                        <textarea class='form-control' ng-model='it.val'></textarea>
+                    </div>
+                </div>
+                <br>
+                <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='saveList()'>Save</button>
+                <button class='btn btn-info col-md-4' ng-click='editObj.title="";'>Cancel</button>
             </div>
         </div>
     </div>

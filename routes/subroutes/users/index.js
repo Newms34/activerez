@@ -214,9 +214,18 @@ router.post('/editList', function(req, res, next) {
     if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
         res.send('err')
     } else {
+        console.log('EDIT LIST:',req.body);
+        // res.send('err')
         mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
             console.log('err?',err)
-            usr[req.body.cat][req.body.n] = req.body.data;
+            var whichDat = usr[req.body.cat][req.body.n];
+            req.body.data.forEach((dpt)=>{
+                if(new Date(dpt.val).toString().toLowerCase()=='invalid date'){   
+                whichDat[dpt.sn]=dpt.val;
+                }else{
+                    whichDat[dpt.sn]= new Date(dpt.val);
+                }
+            })
             usr.save(function(err, doc) {
                 res.send(doc);
             })
@@ -229,9 +238,11 @@ router.post('/removeListItem',function(req,res,next){
     } else {
         mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
             usr[req.body.cat].splice(req.body.n,1);
+
             usr.save(function(err, doc) {
                 res.send(doc);
             })
+
         });
     }
 })

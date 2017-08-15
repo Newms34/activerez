@@ -7,6 +7,7 @@ var usrSchema = new mongoose.Schema({
     first:String, //first name, for things
     last:String,//last name, for more things
     pwd: String,
+    github:String,
     salt: String,
     jobTitle:String,
     creationDate:Date,

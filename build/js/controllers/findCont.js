@@ -28,6 +28,10 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         name: 'Custom Chart: Years per skill',
         msg: 'Generate a custom chart by adding specific skills.',
         id: 2
+    }, {
+        name: 'Repos by Language',
+        msg: 'Github Repositories, organized by language',
+        id: 3
     }];
 
     function hslToHex(h, s, l) {
@@ -67,7 +71,7 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         $scope.cht.data = [
             []
         ];
-        
+
         var skillNums = {};
         if ($scope.chartFmt.id == 0) {
             //skills by tag
@@ -91,12 +95,11 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         } else if ($scope.chartFmt.id == 1) {
             //max yrs by tag
             $scope.cht.title = 'Maximum Years per Tag';
-
             var theSkills = $scope.user.skills.map((usk) => {
                 for (var i = 0; i < $scope.skills.length; i++) {
                     if ($scope.skills[i].name == usk.name) {
-                    	var skl = angular.copy($scope.skills[i]);
-                    	skl.yrs = usk.yrs;
+                        var skl = angular.copy($scope.skills[i]);
+                        skl.yrs = usk.yrs;
                         return skl;
                     }
                 }
@@ -105,44 +108,75 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
                 sk.tags.forEach((skt) => {
                     if (!skillNums[skt.name]) {
                         skillNums[skt.name] = 1;
-                    } else if(skillNums[skt.name]<sk.yrs){
-                        skillNums[skt.name]=sk.yrs;
+                    } else if (skillNums[skt.name] < sk.yrs) {
+                        skillNums[skt.name] = sk.yrs;
                     }
                 })
             });
-        } else {
+        } else if ($scope.chartFmt.id == 2) {
             //custom (most complex Q_Q)
-            $scope.cht.labels=['Add skills by selecting them to the left.'];
-            $scope.cht.data[0]=[1];
-        };
-        for (var lbl in skillNums) {
-            $scope.cht.labels.push(lbl);
-            $scope.cht.data[0].push(skillNums[lbl]);
+            $scope.cht.labels = ['Add skills by selecting them to the left.'];
+            $scope.cht.data[0] = [1];
+        } else {
+            $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((gr) => {
+                console.log(gr.data.map((x) => { return x.name }))
+                $scope.cht.labels = ['unknown'];
+                $scope.cht.data[0] = [0];
+                for (var i = 0; i < gr.data.length; i++) {
+                    console.log(i, gr.data[i].language)
+                    if (!gr.data[i].language || gr.data[i].language == null) {
+                        $scope.cht.data[0][0]++;
+                    } else {
+
+                        if ($scope.cht.labels.indexOf(gr.data[i].language) < 0) {
+                            $scope.cht.labels.push(gr.data[i].language);
+                            $scope.cht.data[0].push(1)
+                        } else {
+                            $scope.cht.data[0][$scope.cht.labels.indexOf(gr.data[i].language)]++;
+                        }
+                    }
+                }
+                $scope.cht.labels.push($scope.cht.labels.shift())
+                $scope.cht.data[0].push($scope.cht.data[0].shift())
+                for (var lbl in skillNums) {
+                    $scope.cht.labels.push(lbl);
+                    $scope.cht.data[0].push(skillNums[lbl]);
+                }
+                $scope.doColors();
+            })
         }
-        $scope.doColors();
-        
+        if ($scope.chartFmt.id < 2) {
+            for (var lbl in skillNums) {
+                $scope.cht.labels.push(lbl);
+                $scope.cht.data[0].push(skillNums[lbl]);
+            }
+            $scope.doColors();
+        }
+
     };
-    $scope.doColors = ()=>{
-    	var currHue = 0;
-    	$scope.cht.colors[0].backgroundColor = [];
+    $scope.doColors = () => {
+        var currHue = 0;
+        $scope.cht.colors[0].backgroundColor = [];
         for (var i = 0; i < $scope.cht.labels.length; i++) {
             var hexCol = hslToHex(currHue, 60, 50);
             $scope.cht.colors[0].backgroundColor.push(hexCol)
-            currHue = (currHue + 55) % 360;
+            currHue = (currHue + 67) % 360;
         }
     }
-    $scope.customAddSkill = ()=>{
-    	console.log('STUFF:',$scope.chartFmt,$scope.newChtSkill);
-    	if($scope.chartFmt.id!=2){
-    		return false;
-    	}
-    	if ($scope.cht.labels[0]=='Add skills by selecting them to the left.'){
-    		$scope.cht.labels=[];
-    		$scope.cht.data=[[]];
-    	}
-    	$scope.cht.data[0].push($scope.newChtSkill.yrs);
-    	$scope.cht.labels.push($scope.newChtSkill.name);
-    	$scope.doColors();
+    $scope.customAddSkill = () => {
+        console.log('STUFF:', $scope.chartFmt, $scope.newChtSkill);
+        if ($scope.chartFmt.id != 2) {
+            return false;
+        }
+        if ($scope.cht.labels[0] == 'Add skills by selecting them to the left.') {
+            $scope.cht.labels = [];
+            $scope.cht.data = [
+                []
+            ];
+        }
+        $scope.cht.data[0].push($scope.newChtSkill.yrs);
+        $scope.cht.labels.push($scope.newChtSkill.name);
+        $scope.doColors();
     }
     $scope.cht = {
         title: '',

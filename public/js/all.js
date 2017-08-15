@@ -235,6 +235,10 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         name: 'Custom Chart: Years per skill',
         msg: 'Generate a custom chart by adding specific skills.',
         id: 2
+    }, {
+        name: 'Repos by Language',
+        msg: 'Github Repositories, organized by language',
+        id: 3
     }];
 
     function hslToHex(h, s, l) {
@@ -274,7 +278,7 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         $scope.cht.data = [
             []
         ];
-        
+
         var skillNums = {};
         if ($scope.chartFmt.id == 0) {
             //skills by tag
@@ -298,12 +302,11 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
         } else if ($scope.chartFmt.id == 1) {
             //max yrs by tag
             $scope.cht.title = 'Maximum Years per Tag';
-
             var theSkills = $scope.user.skills.map((usk) => {
                 for (var i = 0; i < $scope.skills.length; i++) {
                     if ($scope.skills[i].name == usk.name) {
-                    	var skl = angular.copy($scope.skills[i]);
-                    	skl.yrs = usk.yrs;
+                        var skl = angular.copy($scope.skills[i]);
+                        skl.yrs = usk.yrs;
                         return skl;
                     }
                 }
@@ -312,44 +315,75 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
                 sk.tags.forEach((skt) => {
                     if (!skillNums[skt.name]) {
                         skillNums[skt.name] = 1;
-                    } else if(skillNums[skt.name]<sk.yrs){
-                        skillNums[skt.name]=sk.yrs;
+                    } else if (skillNums[skt.name] < sk.yrs) {
+                        skillNums[skt.name] = sk.yrs;
                     }
                 })
             });
-        } else {
+        } else if ($scope.chartFmt.id == 2) {
             //custom (most complex Q_Q)
-            $scope.cht.labels=['Add skills by selecting them to the left.'];
-            $scope.cht.data[0]=[1];
-        };
-        for (var lbl in skillNums) {
-            $scope.cht.labels.push(lbl);
-            $scope.cht.data[0].push(skillNums[lbl]);
+            $scope.cht.labels = ['Add skills by selecting them to the left.'];
+            $scope.cht.data[0] = [1];
+        } else {
+            $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((gr) => {
+                console.log(gr.data.map((x) => { return x.name }))
+                $scope.cht.labels = ['unknown'];
+                $scope.cht.data[0] = [0];
+                for (var i = 0; i < gr.data.length; i++) {
+                    console.log(i, gr.data[i].language)
+                    if (!gr.data[i].language || gr.data[i].language == null) {
+                        $scope.cht.data[0][0]++;
+                    } else {
+
+                        if ($scope.cht.labels.indexOf(gr.data[i].language) < 0) {
+                            $scope.cht.labels.push(gr.data[i].language);
+                            $scope.cht.data[0].push(1)
+                        } else {
+                            $scope.cht.data[0][$scope.cht.labels.indexOf(gr.data[i].language)]++;
+                        }
+                    }
+                }
+                $scope.cht.labels.push($scope.cht.labels.shift())
+                $scope.cht.data[0].push($scope.cht.data[0].shift())
+                for (var lbl in skillNums) {
+                    $scope.cht.labels.push(lbl);
+                    $scope.cht.data[0].push(skillNums[lbl]);
+                }
+                $scope.doColors();
+            })
         }
-        $scope.doColors();
-        
+        if ($scope.chartFmt.id < 2) {
+            for (var lbl in skillNums) {
+                $scope.cht.labels.push(lbl);
+                $scope.cht.data[0].push(skillNums[lbl]);
+            }
+            $scope.doColors();
+        }
+
     };
-    $scope.doColors = ()=>{
-    	var currHue = 0;
-    	$scope.cht.colors[0].backgroundColor = [];
+    $scope.doColors = () => {
+        var currHue = 0;
+        $scope.cht.colors[0].backgroundColor = [];
         for (var i = 0; i < $scope.cht.labels.length; i++) {
             var hexCol = hslToHex(currHue, 60, 50);
             $scope.cht.colors[0].backgroundColor.push(hexCol)
-            currHue = (currHue + 55) % 360;
+            currHue = (currHue + 67) % 360;
         }
     }
-    $scope.customAddSkill = ()=>{
-    	console.log('STUFF:',$scope.chartFmt,$scope.newChtSkill);
-    	if($scope.chartFmt.id!=2){
-    		return false;
-    	}
-    	if ($scope.cht.labels[0]=='Add skills by selecting them to the left.'){
-    		$scope.cht.labels=[];
-    		$scope.cht.data=[[]];
-    	}
-    	$scope.cht.data[0].push($scope.newChtSkill.yrs);
-    	$scope.cht.labels.push($scope.newChtSkill.name);
-    	$scope.doColors();
+    $scope.customAddSkill = () => {
+        console.log('STUFF:', $scope.chartFmt, $scope.newChtSkill);
+        if ($scope.chartFmt.id != 2) {
+            return false;
+        }
+        if ($scope.cht.labels[0] == 'Add skills by selecting them to the left.') {
+            $scope.cht.labels = [];
+            $scope.cht.data = [
+                []
+            ];
+        }
+        $scope.cht.data[0].push($scope.newChtSkill.yrs);
+        $scope.cht.labels.push($scope.newChtSkill.name);
+        $scope.doColors();
     }
     $scope.cht = {
         title: '',
@@ -401,7 +435,6 @@ app.controller('find-ctrl', function($scope, userFact, $http) {
 
 
 });
-
 app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
     $scope.person = {
         jobs: [],
@@ -631,10 +664,10 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         })
     }
     $scope.hidden = {
-            general: false,
-            personal: false,
-            account: false
-        } //stuff to hide dashboard els
+        general: false,
+        personal: false,
+        account: false
+    } //stuff to hide dashboard els
     $scope.refUsr = function() {
         userFact.getUser().then(function(r) {
             $http.get('/skills/all').then((rs) => {
@@ -658,6 +691,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         'user': 'Username', //note: this should NEVER be used, since username is not editable
         'first': 'First Name',
         'email': 'E-Mail',
+        'github':'Github Username',
         'last': 'Last Name',
         'city': 'City',
         'state': 'State',
@@ -694,77 +728,29 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         })
     }
     $scope.addCat = {
-        work: [{
-            n: 'start',
-            desc: 'Start Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'end',
-            desc: 'End Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'cName',
-            desc: 'Company/Organization',
-            t: 'reg'
-        }, {
-            n: 'Position',
-            desc: 'Position',
-            t: 'reg'
-        }, {
-            n: 'other',
-            desc: 'Description',
-            t: 'ta'
-        }, {
-            n: 'current',
-            desc: 'Current Company',
-            t: 'cb'
-        }],
-        edu: [{
-            n: 'start',
-            desc: 'Start Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'end',
-            desc: 'End Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'sName',
-            desc: 'Name of School',
-            t: 'reg'
-        }, {
-            n: 'field',
-            desc: 'Area of Study',
-            t: 'reg'
-        }, {
-            n: 'other',
-            desc: 'Description',
-            t: 'ta'
-        }, {
-            n: 'current',
-            desc: 'Currently Attending',
-            t: 'cb'
-        }],
-        exp: [{
-            n: 'start',
-            desc: 'Start Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'end',
-            desc: 'End Date (or best guess)',
-            t: 'reg'
-        }, {
-            n: 'eName',
-            desc: 'Name of Organization',
-            t: 'reg'
-        }, {
-            n: 'other',
-            desc: 'Description',
-            t: 'ta'
-        }, {
-            n: 'current',
-            desc: 'Ongoing',
-            t: 'cb'
-        }]
+        work: [
+            { n: 'cName', desc: 'Company/Organization', t: 'reg' },
+            { n: 'position', desc: 'Position', t: 'reg' },
+            { n: 'other', desc: 'Description', t: 'ta' },
+            { n: 'start', desc: 'Start Date (or best guess)', t: 'date' },
+            { n: 'current', desc: 'Current Company', t: 'cb' },
+            { n: 'end', desc: 'End Date (or best guess)', t: 'date' }
+        ],
+        edu: [
+            { n: 'sName', desc: 'Name of School', t: 'reg' },
+            { n: 'field', desc: 'Area of Study', t: 'reg' },
+            { n: 'other', desc: 'Description', t: 'ta' },
+            { n: 'start', desc: 'Start Date (or best guess)', t: 'date' },
+            { n: 'current', desc: 'Currently Attending', t: 'cb' },
+            { n: 'end', desc: 'End Date (or best guess)', t: 'date' }
+        ],
+        exp: [
+            { n: 'eName', desc: 'Name of Organization', t: 'reg' },
+            { n: 'other', desc: 'Description', t: 'ta' },
+            { n: 'start', desc: 'Start Date (or best guess)', t: 'date' },
+            { n: 'current', desc: 'Ongoing', t: 'cb' },
+            { n: 'end', desc: 'End Date (or best guess)', t: 'date' }
+        ]
     }
     $scope.addListItem = (t) => {
         console.log(t)
@@ -783,8 +769,12 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
             message: msg
         })
     }
+    $scope.editObj = {
+        title: "",
+        items: []
+    }
     $scope.editField = function(n, p) {
-        console.log('N', n,'P',p)
+        console.log('N', n, 'P', p)
         if (n == 'pwd') {
             //password field; special case
             bootbox.dialog({
@@ -824,80 +814,112 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         } else if (p || p === 0) {
             //other special cases: particularly, this is for arrays (work, edu, etc.).
             //note that this does NOT deal with adding new items or removing them entirely; those are SEPARATE fns!
-            var whichItem = $scope.user[n][p],
-                keys = Object.keys(whichItem),
-                msg = '',
-                inps = [];
-            console.log(keys, whichItem);
-            for (var i = 0; i < keys.length; i++) {
-                console.log('Key is',keys[i])
-                if (keys[i] == 'start' || keys[i] == 'end') {
-                    //date!
-                    var nd = new Date(whichItem[keys[i]]),
-                        dateStr = nd.getFullYear() + '-';
-                    if ((nd.getMonth() + 1).toString().length < 2) {
-                        dateStr += '0' + (nd.getMonth() + 1) + '-'
-                    } else {
-                        dateStr += (nd.getMonth() + 1) + '-';
-                    }
-                    if (nd.getDay().toString().length < 2) {
-                        dateStr += '0' + nd.getDay()
-                    } else {
-                        dateStr += (nd.getDay() + 1);
-                    }
-                    msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
-                    inps.push(`${keys[i]}`)
-                } else if (keys[i] != '_id' && keys[i] != '$$hashKey' && keys[i] !== 'other' && keys[i]!=='current') {
-                    msg += `<div class='row col-md-offset-1'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><input type='text' class='form-control' id='new-${keys[i]}' value='${whichItem[keys[i]]}'></div></div>`;
-                    inps.push(`${keys[i]}`)
-                } else if (keys[i] == 'other') {
-                    msg += `<div class='row col-md-offset-1 big-info'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><textarea class='form-control' id='new-${keys[i]}'>${whichItem[keys[i]]}</textarea></div></div>`;
-                    inps.push(`${keys[i]}`)
-                }else if (keys[i] == 'current') {
-                    // var isChecked
-                    msg += `<div class='row col-md-offset-1 '><div class='input-group col-md-11'><span class='input-group-addon'><input type='checkbox' id='new-${keys[i]}' ${whichItem[keys[i]]?"checked":""}></span><div class='form-control'>Ongoing</div></div></div>`;
-                    inps.push(`${keys[i]}`)
-                }
-            }
-
-            bootbox.dialog({
-                title: `Edit ${$scope.efl[n]}`,
-                message: msg,
-                buttons: {
-                    confirm: {
-                        label: '<i class="fa fa-check"></i> Accept',
-                        className: 'btn-primary',
-                        callback: () => {
-                            data = {};
-                            inps.forEach((dat) => {
-                                if (dat!='current'){   
-                                    data[dat] = $('#new-' + dat).val();
-                                }else{
-                                    data[dat] = $('#new-'+dat).prop('checked');
-                                }
-                            });
-                            console.log(data);
-                            $http.post('/user/editList', {
-                                user: $scope.user.user,
-                                n: p || 0,
-                                cat: n,
-                                data: data
-                            }).then(function(r) {
-                                if (r.data == 'err') {
-                                    bootbox.alert('There was an error saving your data!')
-                                } else {
-                                    //meh.
-                                    $scope.user = r.data;
-                                }
-                            })
-                        }
-                    },
-                    cancel: {
-                        label: '<i class="fa fa-times"></i> Cancel',
-                        className: 'btn-info'
-                    }
-                }
+            var whichItem = $scope.user[n][p];
+            $scope.editObj.title = $scope.efl[n];
+            $scope.editObj.cat = n;
+            $scope.editObj.curr = whichItem['current'];
+            console.log(whichItem);
+            $scope.editObj.items = [];
+            $scope.editObj.n = p;
+            $scope.addCat[n].forEach((fld) => {
+                $scope.editObj.items.push({
+                    sn: fld.n,
+                    d: fld.desc,
+                    t: fld.t,
+                    val: fld.t == 'date' ? new Date(whichItem[fld.n]) : whichItem[fld.n]
+                })
             })
+
+            // var whichItem = $scope.user[n][p],
+            //     keys = Object.keys(whichItem),
+            //     msg = '',
+            //     inps = [];
+            // console.log(keys, whichItem);
+            // for (var i = 0; i < keys.length; i++) {
+            //     console.log('Key is',keys[i])
+            //     if (keys[i] == 'start') {
+            //         //date!
+            //         var nd = new Date(whichItem[keys[i]]),
+            //             dateStr = nd.getFullYear() + '-';
+            //         if ((nd.getMonth() + 1).toString().length < 2) {
+            //             dateStr += '0' + (nd.getMonth() + 1) + '-'
+            //         } else {
+            //             dateStr += (nd.getMonth() + 1) + '-';
+            //         }
+            //         if (nd.getDay().toString().length < 2) {
+            //             dateStr += '0' + nd.getDay()
+            //         } else {
+            //             dateStr += (nd.getDay() + 1);
+            //         }
+            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
+            //         inps.push(`${keys[i]}`)
+            //     }else if (keys[i] == 'end' && !whichItem['current']) {
+            //         //date!
+            //         var nd = new Date(whichItem[keys[i]]),
+            //             dateStr = nd.getFullYear() + '-';
+            //         if ((nd.getMonth() + 1).toString().length < 2) {
+            //             dateStr += '0' + (nd.getMonth() + 1) + '-'
+            //         } else {
+            //             dateStr += (nd.getMonth() + 1) + '-';
+            //         }
+            //         if (nd.getDay().toString().length < 2) {
+            //             dateStr += '0' + nd.getDay()
+            //         } else {
+            //             dateStr += (nd.getDay() + 1);
+            //         }
+            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
+            //         inps.push(`${keys[i]}`)
+            //     } else if (keys[i] != '_id' && keys[i] != '$$hashKey' && keys[i] !== 'other' && keys[i]!=='current') {
+            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><input type='text' class='form-control' id='new-${keys[i]}' value='${whichItem[keys[i]]}'></div></div>`;
+            //         inps.push(`${keys[i]}`)
+            //     } else if (keys[i] == 'other') {
+            //         msg += `<div class='row col-md-offset-1 big-info'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><textarea class='form-control' id='new-${keys[i]}'>${whichItem[keys[i]]}</textarea></div></div>`;
+            //         inps.push(`${keys[i]}`)
+            //     }else if (keys[i] == 'current') {
+            //         // var isChecked
+            //         msg += `<div class='row col-md-offset-1 '><div class='input-group col-md-11'><span class='input-group-addon'><input type='checkbox' id='new-${keys[i]}' ${whichItem[keys[i]]?"checked":""}></span><div class='form-control'>Ongoing</div></div></div>`;
+            //         inps.push(`${keys[i]}`)
+            //     }
+            // }
+
+            // bootbox.dialog({
+            //     title: `Edit ${$scope.efl[n]}`,
+            //     message: msg,
+            //     buttons: {
+            //         confirm: {
+            //             label: '<i class="fa fa-check"></i> Accept',
+            //             className: 'btn-primary',
+            //             callback: () => {
+            //                 data = {};
+            //                 inps.forEach((dat) => {
+            //                     if (dat!='current'){   
+            //                         data[dat] = $('#new-' + dat).val();
+            //                     }else{
+            //                         data[dat] = $('#new-'+dat).prop('checked');
+            //                     }
+            //                 });
+            //                 console.log(data);
+            //                 $http.post('/user/editList', {
+            //                     user: $scope.user.user,
+            //                     n: p || 0,
+            //                     cat: n,
+            //                     data: data
+            //                 }).then(function(r) {
+            //                     if (r.data == 'err') {
+            //                         bootbox.alert('There was an error saving your data!')
+            //                     } else {
+            //                         //meh.
+            //                         $scope.user = r.data;
+            //                     }
+            //                 })
+            //             }
+            //         },
+            //         cancel: {
+            //             label: '<i class="fa fa-times"></i> Cancel',
+            //             className: 'btn-info'
+            //         }
+            //     }
+            // })
         } else {
             bootbox.dialog({
                 title: `Edit ${$scope.efl[n]}`,
@@ -933,8 +955,27 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
     $http.get('/skills/all').then((sk) => {
         $scope.skills = sk.data;
     })
+    $scope.saveList = () => {
+        $http.post('/user/editList', {
+            user: $scope.user.user,
+            n: $scope.editObj.n,
+            cat: $scope.editObj.cat,
+            data: $scope.editObj.items
+        }).then(function(r) {
+            if (r.data == 'err') {
+                bootbox.alert('There was an error saving your data!')
+            } else {
+                //meh.
+                // console.log(r.data);
+                $scope.user = r.data;
+                $scope.editObj = {
+                    title: "",
+                    items: []
+                }
+            }
+        })
+    }
 })
-
 app.controller('nav-cont',function($scope,$http){
 	
 })
