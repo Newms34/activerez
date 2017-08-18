@@ -454,6 +454,7 @@ router.post('/gitgud', function(req, res, next) {
                 res.send(langTots);
                 // res.send(fr.map((frl)=>{return (frl).body}))
             }).catch(function(error) {
+                console.log(error)
                 res.send('err'); // handle error
             });
         })
