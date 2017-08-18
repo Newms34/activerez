@@ -20,6 +20,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         account: false
     } //stuff to hide dashboard els
     $scope.refUsr = function() {
+        //any time we need to refresh the user, this fn is run
         userFact.getUser().then(function(r) {
             $http.get('/skills/all').then((rs) => {
                 r.user.skills.forEach((m) => {
@@ -36,13 +37,14 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         });
     };
     $scope.refUsr();
+
     $scope.user = null;
     $scope.efl = {
         'pwd': 'Password',
         'user': 'Username', //note: this should NEVER be used, since username is not editable
         'first': 'First Name',
         'email': 'E-Mail',
-        'github':'Github Username',
+        'github': 'Github Username',
         'last': 'Last Name',
         'city': 'City',
         'state': 'State',
@@ -102,6 +104,14 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
             { n: 'current', desc: 'Ongoing', t: 'cb' },
             { n: 'end', desc: 'End Date (or best guess)', t: 'date' }
         ]
+    }
+    $scope.updateSkill = (s) => {
+        $http.post('/user/editSkill', {
+            user: $scope.user.user,
+            skill: s
+        }).then((r) => {
+            $scope.refUsr();
+        });
     }
     $scope.addListItem = (t) => {
         console.log(t)
@@ -180,97 +190,6 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                     val: fld.t == 'date' ? new Date(whichItem[fld.n]) : whichItem[fld.n]
                 })
             })
-
-            // var whichItem = $scope.user[n][p],
-            //     keys = Object.keys(whichItem),
-            //     msg = '',
-            //     inps = [];
-            // console.log(keys, whichItem);
-            // for (var i = 0; i < keys.length; i++) {
-            //     console.log('Key is',keys[i])
-            //     if (keys[i] == 'start') {
-            //         //date!
-            //         var nd = new Date(whichItem[keys[i]]),
-            //             dateStr = nd.getFullYear() + '-';
-            //         if ((nd.getMonth() + 1).toString().length < 2) {
-            //             dateStr += '0' + (nd.getMonth() + 1) + '-'
-            //         } else {
-            //             dateStr += (nd.getMonth() + 1) + '-';
-            //         }
-            //         if (nd.getDay().toString().length < 2) {
-            //             dateStr += '0' + nd.getDay()
-            //         } else {
-            //             dateStr += (nd.getDay() + 1);
-            //         }
-            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
-            //         inps.push(`${keys[i]}`)
-            //     }else if (keys[i] == 'end' && !whichItem['current']) {
-            //         //date!
-            //         var nd = new Date(whichItem[keys[i]]),
-            //             dateStr = nd.getFullYear() + '-';
-            //         if ((nd.getMonth() + 1).toString().length < 2) {
-            //             dateStr += '0' + (nd.getMonth() + 1) + '-'
-            //         } else {
-            //             dateStr += (nd.getMonth() + 1) + '-';
-            //         }
-            //         if (nd.getDay().toString().length < 2) {
-            //             dateStr += '0' + nd.getDay()
-            //         } else {
-            //             dateStr += (nd.getDay() + 1);
-            //         }
-            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-8'><span class='input-group-addon'>${keys[i]}</span><input type='date' class='form-control' id='new-${keys[i]}' value='${dateStr}'></div></div>`;
-            //         inps.push(`${keys[i]}`)
-            //     } else if (keys[i] != '_id' && keys[i] != '$$hashKey' && keys[i] !== 'other' && keys[i]!=='current') {
-            //         msg += `<div class='row col-md-offset-1'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><input type='text' class='form-control' id='new-${keys[i]}' value='${whichItem[keys[i]]}'></div></div>`;
-            //         inps.push(`${keys[i]}`)
-            //     } else if (keys[i] == 'other') {
-            //         msg += `<div class='row col-md-offset-1 big-info'><div class='input-group col-md-11'><span class='input-group-addon'>${$scope.efl[keys[i]]}</span><textarea class='form-control' id='new-${keys[i]}'>${whichItem[keys[i]]}</textarea></div></div>`;
-            //         inps.push(`${keys[i]}`)
-            //     }else if (keys[i] == 'current') {
-            //         // var isChecked
-            //         msg += `<div class='row col-md-offset-1 '><div class='input-group col-md-11'><span class='input-group-addon'><input type='checkbox' id='new-${keys[i]}' ${whichItem[keys[i]]?"checked":""}></span><div class='form-control'>Ongoing</div></div></div>`;
-            //         inps.push(`${keys[i]}`)
-            //     }
-            // }
-
-            // bootbox.dialog({
-            //     title: `Edit ${$scope.efl[n]}`,
-            //     message: msg,
-            //     buttons: {
-            //         confirm: {
-            //             label: '<i class="fa fa-check"></i> Accept',
-            //             className: 'btn-primary',
-            //             callback: () => {
-            //                 data = {};
-            //                 inps.forEach((dat) => {
-            //                     if (dat!='current'){   
-            //                         data[dat] = $('#new-' + dat).val();
-            //                     }else{
-            //                         data[dat] = $('#new-'+dat).prop('checked');
-            //                     }
-            //                 });
-            //                 console.log(data);
-            //                 $http.post('/user/editList', {
-            //                     user: $scope.user.user,
-            //                     n: p || 0,
-            //                     cat: n,
-            //                     data: data
-            //                 }).then(function(r) {
-            //                     if (r.data == 'err') {
-            //                         bootbox.alert('There was an error saving your data!')
-            //                     } else {
-            //                         //meh.
-            //                         $scope.user = r.data;
-            //                     }
-            //                 })
-            //             }
-            //         },
-            //         cancel: {
-            //             label: '<i class="fa fa-times"></i> Cancel',
-            //             className: 'btn-info'
-            //         }
-            //     }
-            // })
         } else {
             bootbox.dialog({
                 title: `Edit ${$scope.efl[n]}`,
@@ -290,7 +209,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                                     bootbox.alert(`There was an error changing your ${$scope.efl[n]}!`);
                                 } else {
 
-                                    $scope.user = r.data;
+                                    $scope.refUsr();
                                 }
                             })
                         }
@@ -303,9 +222,94 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
             });
         }
     }
+    $scope.newSkill = {};
+    $scope.setupNewSkill = () => {
+        $scope.newSkill = {
+            yrs: 0
+        }
+        $scope.addSkill = true;
+    }
+    $scope.addTag = (nst) => {
+        if (!nst) {
+            return false; //no tag, so dont add;
+        } else {
+            if (!$scope.newSkill.tags) {
+                $scope.newSkill.tags = [];
+            }
+            $scope.newSkill.tags.push({
+                name: nst.name,
+                rating: 100
+            });
+        }
+        console.log($scope.newSkill, nst)
+    }
+    $
+    $scope.removeTag = (n) => {
+        console.log('REMOVING', n, 'FROM', $scope.newSkill.tags)
+        $scope.newSkill.tags.splice(n, 1)
+    }
+    $scope.resetSkill = () => {
+        $scope.newSkill = {
+            yrs: 0
+        };
+        $scope.addSkill = false;
+    };
+    $scope.toggleNewSk = function(n) {
+        $scope.newSkNew = n == '1';
+    }
+    $scope.newSkNew = false;
+    $scope.pikSkill = {};
+    $scope.saveNewSkill = function() {
+        if (!$scope.newSkill.yrs) {
+            bootbox.alert(`You can't enter a skill with zero years!`)
+        } else {
+            // if new, we save to skill DB. in BOTH cases, we save to user db.
+            var theSkill = null;
+            if ($scope.newSkNew) {
+                //new skill
+                console.log('NEW SK:', $scope.newSkill)
+                // $scope.newSkill.user = $scope.user;
+                theSkill = angular.copy($scope.newSkill);
+                theSkill.user = $scope.user.user;
+                $http.post('/skills/new', theSkill).then((sk) => {
+                    $scope.skills = sk.data;
+                });
+            } else {
+                //old skill
+                theSkill = angular.copy($scope.pikSkill);
+                theSkill.user = $scope.user.user;
+                theSkill.yrs = $scope.newSkill.yrs;
+            }
+            $http.post('/user/addSkill', theSkill).then((u) => {
+                $scope.addSkill=false;
+                $scope.refUsr();
+            });
+        }
+    }
     $http.get('/skills/all').then((sk) => {
         $scope.skills = sk.data;
     })
+    $http.get('/tags/all').then((tg) => {
+        $scope.tags = tg.data;
+    })
+    $scope.inclFilt = (a, s) => {
+        return function(n) {
+            /*
+            a is the array. ex: available tags
+            s is the included array. ex: newSkill.tags
+            n is the item.
+            */
+            if (!s) {
+                return true;
+            }
+            for (var i = 0; i < s.length; i++) {
+                if (s[i].name && s[i].name == n.name) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
     $scope.saveList = () => {
         $http.post('/user/editList', {
             user: $scope.user.user,
@@ -318,7 +322,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
             } else {
                 //meh.
                 // console.log(r.data);
-                $scope.user = r.data;
+                $scope.refUsr();
                 $scope.editObj = {
                     title: "",
                     items: []
@@ -326,4 +330,4 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
             }
         })
     }
-})
+});

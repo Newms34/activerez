@@ -3,7 +3,7 @@ var express = require('express'),
     http = require('http'),
     server = http.Server(app),
     io = require('socket.io')(server);
-    var routes = require('./routes'),
+var routes = require('./routes'),
     path = require('path'),
     cookieParser = require('cookie-parser'),
     cookie = require('cookie'),
@@ -14,7 +14,7 @@ var express = require('express'),
     compression = require('compression');
 app.use(compression());
 
-const sesh =session({
+const sesh = session({
     secret: 'ea augusta est et carissima'
 });
 app.use(sesh);
@@ -25,13 +25,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
-app.set('io',io)
+app.set('io', io)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'views')));
 app.use('/', routes);
-// var server = http.Server(app);
-// var io = require('socket.io')(server);
 var names = [];
 io.use(function(socket, next) {
     sesh(socket.request, socket.request.res, next);
@@ -43,14 +41,14 @@ io.on('connection', function(socket) {
     //         names.push(chatObj.name);
     //     }
     //     console.log(chatObj);
-        
+
     //     io.sockets.in(chatObj.grp).emit('chatOut', chatObj);
     // });
     socket.on('joinRooms', function(roomObj) {
         //NEEDS SECURITY! or at least verification that user is who they say they are
         var actualUsr = socket.request.session.user.name
-        console.log('USR CHECK:',actualUsr,':',roomObj.user)
-        if(!actualUsr|| actualUsr!=roomObj.user){
+        console.log('USR CHECK:', actualUsr, ':', roomObj.user)
+        if (!actualUsr || actualUsr != roomObj.user) {
             //no response, since this user failed auth.
             return false;
         }
@@ -67,7 +65,7 @@ server.on('error', function(err) {
 server.on('listening', function(lst) {
     console.log('Server is listening!')
 });
-server.on('request', function(req) {
+server.on('request', function(req, res) {
     console.log(req.body);
 })
 

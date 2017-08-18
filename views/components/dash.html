@@ -187,31 +187,34 @@
             </div>
             <h4 class='col-md-12 col-md-offset-1'>Skills</h4>
             <button class='btn btn-primary pull-right' ng-click='hidden.skills=!hidden.skills'>x</button>
-            <div ng-hide='hidden.skills' class='col-md-8'>
-                <div class='col-md-8 col-md-offset-1 text-muted'>(The fun part)</div>
-                <table class='col-md-offset-2 table'>
-                    <thead>
-                        <tr>
-                            <th>Skill</th>
-                            <th>Years of experience</th>
-                            <th>Description</th>
-                            <th>&nbsp;</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat='sk in user.skills'>
-                            <td>{{skillList[sk.id].name}}</td>
-                            <td>{{sk.yrs}}</td>
-                            <td>{{skillList[sk.id].desc}}</td>
-                            <td>
-                                <button class='btn btn-xs btn-primary'><i class='fa fa-pencil-square-o'></i> Edit</button>
-                                <br>
-                                <button class='btn btn-xs btn-info' ng-click='removeItem("skills",$index)'><i class='fa fa-times'></i> Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button class='btn btn-primary col-md-4 col-md-offset-2'><i class='fa fa-plus'></i> Add Skill</button>
+            <div ng-hide='hidden.skills'>
+                <div class='col-md-8 col-md-offset-1 text-muted'>(The fun part)
+                    <br>
+                    <table class='col-md-offset-2 table'>
+                        <thead>
+                            <tr>
+                                <th>Skill</th>
+                                <th>Years of experience</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat='sk in user.skills'>
+                                <td>{{skillList[sk.id].name}}</td>
+                                <td>
+                                    <input type="number" min=0 ng-model='sk.yrs' ng-change='sk.mod=true'>
+                                </td>
+                                <td>{{skillList[sk.id].desc}}</td>
+                                <td class='row'>
+                                    <button class='btn btn-xs btn-primary' ng-click='updateSkill(sk)' ng-disabled='!sk.mod'><i class='fa fa-pencil-square-o'></i> Update</button>
+                                    <button class='btn btn-xs btn-info' ng-click='removeSkill(sk)'><i class='fa fa-times'></i> Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='setupNewSkill();'><i class='fa fa-plus'></i> Add Skill</button>
             </div>
         </div>
     </div>
@@ -240,6 +243,95 @@
                 <br>
                 <button class='btn btn-primary col-md-4 col-md-offset-2' ng-click='saveList()'>Save</button>
                 <button class='btn btn-info col-md-4' ng-click='editObj.title="";'>Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div class='deet-bg' ng-show='addSkill'>
+        <div class='panel panel-primary col-md-8 col-md-offset-2'>
+            <div class='panel-heading'>
+                Add Skill
+            </div>
+            <div class='panel-body'>
+                <div class='col-md-10 col-md-offset-1 panel panel-primary'>
+                    <div class='panel-heading'>New Skill</div>
+                    <div class='panel-body'>
+                        <div class='text-muted small col-md-offset-1'>
+                            Either pick an existing skill to add, or create your own!
+                        </div>
+                        <div class='col-md-10 col-md-offset-1 panel panel-primary' ng-click='toggleNewSk(0)' ng-class='{"picked":!newSkNew,"unpicked":newSkNew}'>
+                            <div class='panel-heading'>Pick a skill</div>
+                            <div class='panel-body' ng-show='!newSkNew'>
+                                <div class='col-md-12'>
+                                    <div class='col-md-3'>Skill:</div>
+                                    <select ng-model='$parent.pikSkill' class='col-md-9' ng-options=' sk.name for sk in skills|filter:inclFilt(skills,user.skills)'></select>
+                                </div>
+                                <div class='col-md-12'>
+                                    <div class='col-md-2'>Tags:</div>
+                                    <div class='col-md-10 row'>
+                                        <div class='btn btn-primary btn-xs' style='margin-right:2px;' ng-repeat='tg in pikSkill.tags'>{{tg.name}} </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='col-md-3 col-md-offset-5'>
+                            <h5>OR</h5>
+                        </div>
+                        <!-- <div class='row'> -->
+                        <div class='col-md-10 col-md-offset-1 panel panel-primary' ng-click='toggleNewSk(1)' ng-class='{"picked":newSkNew,"unpicked":!newSkNew}'>
+                            <div class='panel-heading'>
+                                Create a new skill
+                            </div>
+                            <div class='panel-body' ng-show='newSkNew'>
+                                <!-- <ol> -->
+                                <div class='row col-md-12'>
+                                    <div class='col-md-3'>Skill Name:</div>
+                                    <input type="text" class='col-md-9' ng-model='newSkill.name' placeholder='Give your skill a name' ng-change='newSkill.tags=[]'>
+                                </div>
+                                <br>
+                                <br>
+                                <div class='row col-md-12'>
+                                    <div class='col-md-3'>Description:</div>
+                                    <input type="text" class='col-md-9' ng-model='newSkill.desc' placeholder='Add a nice description about this skill'>
+                                </div>
+                                <br>
+                                <br>
+                                <div class='row col-md-12'>
+                                    <div class='col-md-12 row'>
+                                        <div class='col-md-2'>Add Tags:</div>
+                                        <select ng-model='newSkillTag' class='col-md-6' ng-options='tg as tg.name for tg in tags|filter:inclFilt(tags,newSkill.tags)'></select>
+                                        <button class='col-md-offset-1 btn btn-primary btn-xs' ng-click='addTag(newSkillTag);'><i class='fa fa-plus'></i> Add Tag</button>
+                                    </div>
+                                    <div class='col-md-12'>
+                                        <button class='btn btn-xs btn-primary' ng-repeat='tag in newSkill.tags' ng-click='removeTag($index);'>
+                                            {{tag.name}}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <hr class='col-md-11'>
+                <br>
+                <br>
+                <div class='col-md-10 col-md-offset-1 panel panel-primary'>
+                    <div class='panel-heading'>Number of Years</div>
+                    <div class='panel-body'>
+                        <div class='text-muted small col-md-offset-1'>
+                            How many years have you used this skill?
+                        </div>
+                        <div class='row col-md-12'>
+                            <div class='col-md-2 col-md-offset-1'>Years:</div>
+                            <input type="number" class='col-md-9' ng-model='newSkill.yrs' min='0' step='.5' value='0'>
+                        </div>
+                    </div>
+                </div>
+                <div class='col-md-10 col-md-offset-1 row'>
+                    <button class='col-md-5 btn btn-primary' ng-click='saveNewSkill();'>Save</button>
+                    <button class='col-md-5 col-md-offset-2 btn btn-info' ng-click='resetSkill();'>Cancel</button>
+                </div>
             </div>
         </div>
     </div>

@@ -33,6 +33,9 @@ body {
         // }
     }
 }
+.bootbox{
+    z-index:1300;
+}
 
 .reg-grp {
     background: #339;
@@ -137,7 +140,7 @@ label {
 
 .deet-bg{
     position:fixed;
-    z-index:99;
+    z-index:1234;
     background:rgba(0,0,0,0.5);
     left:0;
     top:0;
@@ -145,6 +148,6 @@ label {
     height:100%;
     & > .panel{
         position:relative;
-        top:60px;
+        top:20px;
     }
 }

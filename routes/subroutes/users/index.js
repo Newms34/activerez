@@ -13,7 +13,10 @@ var router = express.Router(),
             error: console.error
         },
         silent: false
-    });
+    }),
+    Promise = require('bluebird'),
+    pReq = Promise.promisifyAll(require('request')),
+    request = require('request');
 
 
 router.post('/sendMsg', function(req, res, next) {
@@ -214,16 +217,16 @@ router.post('/editList', function(req, res, next) {
     if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
         res.send('err')
     } else {
-        console.log('EDIT LIST:',req.body);
+        console.log('EDIT LIST:', req.body);
         // res.send('err')
         mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
-            console.log('err?',err)
+            console.log('err?', err)
             var whichDat = usr[req.body.cat][req.body.n];
-            req.body.data.forEach((dpt)=>{
-                if(new Date(dpt.val).toString().toLowerCase()=='invalid date'){   
-                whichDat[dpt.sn]=dpt.val;
-                }else{
-                    whichDat[dpt.sn]= new Date(dpt.val);
+            req.body.data.forEach((dpt) => {
+                if (new Date(dpt.val).toString().toLowerCase() == 'invalid date') {
+                    whichDat[dpt.sn] = dpt.val;
+                } else {
+                    whichDat[dpt.sn] = new Date(dpt.val);
                 }
             })
             usr.save(function(err, doc) {
@@ -232,12 +235,32 @@ router.post('/editList', function(req, res, next) {
         });
     }
 })
-router.post('/removeListItem',function(req,res,next){
+
+router.post('/editSkill', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        // res.send('err')
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            for (var i = 0; i < usr.skills.length; i++) {
+                if (usr.skills[i].name == req.body.skill.name) {
+                    usr.skills[i].yrs = req.body.skill.yrs;
+                    break;
+                }
+            }
+            usr.save(function(err, doc) {
+                res.send(doc);
+            })
+        });
+    }
+})
+
+router.post('/removeListItem', function(req, res, next) {
     if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
         res.send('err')
     } else {
         mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
-            usr[req.body.cat].splice(req.body.n,1);
+            usr[req.body.cat].splice(req.body.n, 1);
 
             usr.save(function(err, doc) {
                 res.send(doc);
@@ -355,8 +378,95 @@ router.post('/resetPwd/', function(req, res, next) {
                     res.send('done')
                 });
             }
+        });
+    }
+})
+router.post('/addSkill', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            if (err) {
+                console.log('err!', err)
+            }
+            usr.skills.push({
+                name: req.body.name,
+                yrs: req.body.yrs
+            });
+            usr.save(function(err, susr) {
+                console.log('updated user skills', susr.skills)
+                res.send(susr);
+            })
+        })
+    }
+})
+
+router.post('/gitgud', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        //return format = {labelArray,percentArray}
+        var options = {
+            url: 'https://api.github.com/users/' + req.body.user + '/repos?per_page=100&client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+            headers: {
+                'User-Agent': 'Newms34'
+            }
+        };
+        request.get(options, function(err, resp) {
+            // console.log(resp.body,typeof resp.body)
+            reeps = JSON.parse(resp.body).map((rp) => { return rp.name });
+ 
+            var proms = reeps.map((rpo) => {
+                var options = {
+                    url: 'https://api.github.com/repos/' + req.body.user + '/' + rpo + '/languages?client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+                    headers: {
+                        'User-Agent': 'Newms34'
+                    }
+                };
+                return pReq.getAsync(options);
+            });
+            Promise.all(proms).then((fr) => {
+                // console.log('FR-----\n', fr, '\n----END FR')
+                var langs = fr.map((frl)=>{
+                    return JSON.parse(frl[0].body)
+                })
+                var langTots = {
+                    lbls:[],
+                    data:[]
+                }
+                langs.forEach((frlo)=>{
+                    for (var lng in frlo){
+                        if(frlo.hasOwnProperty(lng)){
+                            var pos = langTots.lbls.indexOf(lng);
+                            if(pos<0){
+                                langTots.lbls.push(lng);
+                                langTots.data.push(frlo[lng]);
+                            }else{
+                                langTots.data[pos]+=frlo[lng];
+                            }
+                        }
+                    }
+                })
+                totalLines = langTots.data.reduce((c,n)=>{return c+n});
+                langTots.data = langTots.data.map((rt)=>{
+                    return Math.floor(10000*rt/totalLines)/100;
+                })
+                res.send(langTots);
+                // res.send(fr.map((frl)=>{return (frl).body}))
+            }).catch(function(error) {
+                res.send('err'); // handle error
+            });
         })
     }
 })
 
 module.exports = router;
+
+/*
+var x = [
+        3087051,
+        904046,
+        236643,
+        24938
+    ]
+*/
