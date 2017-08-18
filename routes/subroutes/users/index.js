@@ -451,8 +451,8 @@ router.post('/gitgud', function(req, res, next) {
                 langTots.data = langTots.data.map((rt)=>{
                     return Math.floor(10000*rt/totalLines)/100;
                 })
+                console.log('LANGTOTS:',langTots)
                 res.send(langTots);
-                // res.send(fr.map((frl)=>{return (frl).body}))
             }).catch(function(error) {
                 console.log(error)
                 res.send('err'); // handle error
