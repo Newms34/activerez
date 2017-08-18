@@ -407,7 +407,7 @@ router.post('/gitgud', function(req, res, next) {
     } else {
         //return format = {labelArray,percentArray}
         var options = {
-            url: 'https://api.github.com/users/' + req.body.user + '/repos?per_page=100&client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+            url: 'https://api.github.com/users/' + req.body.git + '/repos?per_page=100&client_id='+process.env.cid+'&client_secret='+process.env.csecret,
             headers: {
                 'User-Agent': 'Newms34'
             }
@@ -418,7 +418,7 @@ router.post('/gitgud', function(req, res, next) {
  
             var proms = reeps.map((rpo) => {
                 var options = {
-                    url: 'https://api.github.com/repos/' + req.body.user + '/' + rpo + '/languages?client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+                    url: 'https://api.github.com/repos/' + req.body.git + '/' + rpo + '/languages?client_id='+process.env.cid+'&client_secret='+process.env.csecret,
                     headers: {
                         'User-Agent': 'Newms34'
                     }

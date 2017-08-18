@@ -124,7 +124,8 @@ app.controller('find-ctrl', function($scope, userFact, $http, $q) {
                     $scope.makeChtData();
                 })
             } else {
-                $http.post('/user/gitgud', {user:$scope.user.github}).then((r)=>{
+                $http.post('/user/gitgud', {git:$scope.user.github,
+                    user:$scope.user.user}).then((r)=>{
                     console.log(r.data)
                     $scope.cht.labels=r.data.lbls;
                     $scope.cht.data[0]=r.data.data;
