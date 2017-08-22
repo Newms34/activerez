@@ -15,7 +15,7 @@ var router = express.Router(),
         silent: false
     }),
     cid = process.env.cid||null,
-    csecret = process.env.secret||null,
+    csecret = process.env.csecret||null,
     fs = require('fs');
     Promise = require('bluebird'),
     pReq = Promise.promisifyAll(require('request')),
