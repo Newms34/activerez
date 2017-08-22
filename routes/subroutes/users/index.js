@@ -14,37 +14,22 @@ var router = express.Router(),
         },
         silent: false
     }),
+    cid = process.env.cid||null,
+    csecret = process.env.secret||null,
+    fs = require('fs');
     Promise = require('bluebird'),
     pReq = Promise.promisifyAll(require('request')),
     request = require('request');
-
-
-router.post('/sendMsg', function(req, res, next) {
-    //user sends message to another user
-    console.log('SEND MSG', req.body)
-    if (!req.session || !req.session.user || req.session.user.name != req.body.from) {
-        res.send('err');
-    } else {
-        mongoose.model('User').findOne({ 'name': req.body.to }, function(err, usr) {
-            if (!usr || err) {
-                console.log(usr, err)
-                res.send('err');
-            } else {
-                usr.msgs.push({
-                    from: req.body.from,
-                    date: new Date().getTime(),
-                    msg: req.body.msg,
-                    id: Math.floor(Math.random() * 999999999).toString(32)
-                })
-                usr.save(function(err, usr) {
-                    console.log('User updated!', usr.msgs)
-                    io.emit('msgRef', { who: req.body.to }); //send out to trigger refresh
-                    res.send('done');
-                });
-            }
-        });
+fs.readFile('./seekritz.js','utf8',function(err,data){
+    console.log('READFILE!: err',err,'data',data);
+    if(err){
+        return false; //probly remote, so no key file
     }
-});
+    var keez = JSON.parse(data);
+    console.log(keez,keez.id);
+    cid = keez.id;
+    csecret = keez.secret;
+})
 router.get('/usrData/:name', function(req, res, next) {
     if (!req.session || !req.session.user || !req.session.user.user || req.session.user.user != req.params.name) {
         res.send('no'); //auth err!
@@ -136,7 +121,7 @@ router.post('/new', function(req, res, next) {
     })
 });
 router.get('/nameOkay/:name', function(req, res, next) {
-    mongoose.model('User').find({ 'name': req.params.name }, function(err, user) {
+    mongoose.model('User').find({ 'user': req.params.name }, function(err, user) {
         console.log('USER CHECK', user)
         if (!user.length) {
             //this user does not exist yet
@@ -159,6 +144,7 @@ router.post('/login', function(req, res, next) {
                 if (resp && req.session) {
                     req.session.user = resp;
                 }
+                console.log('USER IS:-----\n',req.session.user,'-----END USER')
                 res.send(resp)
             });
         }
@@ -166,7 +152,7 @@ router.post('/login', function(req, res, next) {
 });
 router.get('/chkLog', function(req, res, next) {
     var testMode = false;
-    console.log(req.session)
+    console.log('CHECK LOG USER',req.session)
     if (testMode) {
         res.send({ result: true, user: 'TEST' })
     } else if (req.session && req.session.user) {
@@ -174,7 +160,8 @@ router.get('/chkLog', function(req, res, next) {
         delete req.session.user.salt;
         delete req.session.user.reset;
         //we don't wanna send those!
-        mongoose.model('User').findOne({ name: req.session.user.name }, function(err, usr) {
+        mongoose.model('User').findOne({ user: req.session.user.user }, function(err, usr) {
+                // throw new Error('PAUSED!')
             req.session.user = usr;
             res.send({ result: true, user: usr });
         })
@@ -210,6 +197,7 @@ router.get('/logout', function(req, res, next) {
     */
     console.log('usr sez bai');
     req.session.destroy();
+    console.log('req.sesh now',req.session)
     res.send('logged');
 });
 
@@ -407,18 +395,18 @@ router.post('/gitgud', function(req, res, next) {
     } else {
         //return format = {labelArray,percentArray}
         var options = {
-            url: 'https://api.github.com/users/' + req.body.git + '/repos?per_page=100&client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+            url: 'https://api.github.com/users/' + req.body.git + '/repos?per_page=100&client_id=' + cid + '&client_secret=' + csecret,
             headers: {
                 'User-Agent': 'Newms34'
             }
         };
         request.get(options, function(err, resp) {
             // console.log(resp.body,typeof resp.body)
-            reeps = JSON.parse(resp.body).map((rp) => { return rp.name });
- 
+            console.log('credentials',cid,csecret);
+            var reeps = JSON.parse(resp.body).map((rp) => { return rp.name });
             var proms = reeps.map((rpo) => {
                 var options = {
-                    url: 'https://api.github.com/repos/' + req.body.git + '/' + rpo + '/languages?client_id='+process.env.cid+'&client_secret='+process.env.csecret,
+                    url: 'https://api.github.com/repos/' + req.body.git + '/' + rpo + '/languages?client_id=' + cid + '&client_secret=' + csecret,
                     headers: {
                         'User-Agent': 'Newms34'
                     }
@@ -427,31 +415,31 @@ router.post('/gitgud', function(req, res, next) {
             });
             Promise.all(proms).then((fr) => {
                 // console.log('FR-----\n', fr, '\n----END FR')
-                var langs = fr.map((frl)=>{
+                var langs = fr.map((frl) => {
                     return JSON.parse(frl[0].body)
                 })
                 var langTots = {
-                    lbls:[],
-                    data:[]
+                    lbls: [],
+                    data: []
                 }
-                langs.forEach((frlo)=>{
-                    for (var lng in frlo){
-                        if(frlo.hasOwnProperty(lng)){
+                langs.forEach((frlo) => {
+                    for (var lng in frlo) {
+                        if (frlo.hasOwnProperty(lng)) {
                             var pos = langTots.lbls.indexOf(lng);
-                            if(pos<0){
+                            if (pos < 0) {
                                 langTots.lbls.push(lng);
                                 langTots.data.push(frlo[lng]);
-                            }else{
-                                langTots.data[pos]+=frlo[lng];
+                            } else {
+                                langTots.data[pos] += frlo[lng];
                             }
                         }
                     }
                 })
-                totalLines = langTots.data.reduce((c,n)=>{return c+n});
-                langTots.data = langTots.data.map((rt)=>{
-                    return Math.floor(10000*rt/totalLines)/100;
+                totalLines = langTots.data.reduce((c, n) => { return c + n });
+                langTots.data = langTots.data.map((rt) => {
+                    return Math.floor(10000 * rt / totalLines) / 100;
                 })
-                console.log('LANGTOTS:',langTots)
+                console.log('LANGTOTS:', langTots)
                 res.send(langTots);
             }).catch(function(error) {
                 console.log(error)
@@ -459,15 +447,165 @@ router.post('/gitgud', function(req, res, next) {
             });
         })
     }
+});
+
+
+router.post('/addCont', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, ures) {
+            mongoose.model('User').findOne({ user: req.body.cont }, function(err, contres) {
+                var cpos = ures.contacts.indexOf(req.body.cont),
+                    bpos = ures.blocked.indexOf(req.body.cont);
+                if (cpos > -1 || !contres) {
+                    res.send('no'); //either user already in list, or doesnt exist
+                } else {
+                    ures.contacts.push(req.body.cont);
+                    ures.save(function(err, nusr) {
+                        res.send('done');
+                    })
+                }
+            })
+        })
+    }
 })
 
-module.exports = router;
+router.post('/removeCont', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, ures) {
+            mongoose.model('User').findOne({ user: req.body.cont }, function(err, contres) {
+                var cpos = ures.contacts.indexOf(req.body.cont),
+                    bpos = ures.blocked.indexOf(req.body.cont);
+                if (cpos < 0 || !contres) {
+                    res.send('no'); //either user already in list, or doesnt exist
+                } else {
+                    ures.contacts.splice(pos, 1);
+                    ures.save(function(err, nusr) {
+                        res.send('done');
+                    })
+                }
+            })
+        })
+    }
+})
 
-/*
-var x = [
-        3087051,
-        904046,
-        236643,
-        24938
-    ]
-*/
+router.post('/addBlock', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, ures) {
+            mongoose.model('User').findOne({ user: req.body.cont }, function(err, contres) {
+                var cpos = ures.contacts.indexOf(req.body.cont),
+                    bpos = ures.blocked.indexOf(req.body.cont);
+                if (bpos > -1 || !contres) {
+                    res.send('no'); //either user already in list, or doesnt exist
+                } else {
+                    ures.blocked.push(req.body.cont);
+                    ures.save(function(err, nusr) {
+                        res.send('done');
+                    })
+                }
+            })
+        })
+    }
+})
+
+router.post('/removeBlock', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, ures) {
+            mongoose.model('User').findOne({ user: req.body.cont }, function(err, contres) {
+                var cpos = ures.contacts.indexOf(req.body.cont),
+                    bpos = ures.blocked.indexOf(req.body.cont);
+                if (pbos < 0 || !contres) {
+                    res.send('no'); //either user already in list, or doesnt exist
+                } else {
+                    ures.blocked.splice(pos, 1);
+                    ures.save(function(err, nusr) {
+                        res.send('done');
+                    })
+                }
+            })
+        })
+    }
+})
+router.post('/msgRead', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            usr[req.body.type].find((r) => {
+                return r.id == req.body.id;
+            }).read = true;
+            usr.save(function(r) {
+                res.send('done');
+            })
+        })
+    }
+});
+router.post('/delMsg', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.user) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.user }, function(err, usr) {
+            console.log('USER:',usr,req.body.type)
+            var theMsg = usr[req.body.type].filter((it) => {
+                it.id == req.body.id;
+            })[0];
+            usr[req.body.type] = usr[req.body.type].filter((it) => {
+                it.id != req.body.id;
+            });
+            usr.save(function(r) {
+                res.send(theMsg);
+            })
+        })
+    }
+})
+
+router.post('/sendMsg', function(req, res, next) {
+    if (!req.session || !req.session.user || req.session.user.user != req.body.source) {
+        res.send('err')
+    } else {
+        mongoose.model('User').findOne({ user: req.body.source }, function(err, usr) {
+            mongoose.model('User').findOne({ user: req.body.dest }, function(terr, tusr) {
+                console.log('usr',usr,'tusr',tusr)
+                if (!usr || !tusr) {
+                    res.send('err');
+                } else {
+                    var theId = Math.floor(Math.random() * 999999999999).toString(32);
+                    if (tusr.blocked.indexOf(req.body.source)>-1) {
+                        //destination has blocked this user;
+                        //don't send message, and send notification to user
+                        res.send('ban');
+                    } else {
+                        tusr.msgs.push({
+                            person: req.body.source,
+                            time: new Date(),
+                            msg: req.body.msg,
+                            subj: req.body.subj,
+                            read: false,
+                            id: theId
+                        });
+                        usr.sent.push({
+                            person: req.body.dest,
+                            time: new Date(),
+                            msg: req.body.msg,
+                            subj: req.body.subj,
+                            id: theId
+                        })
+                        usr.save(function(r) {
+                            tusr.save(function(tr) {
+                                res.send('done');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+    }
+})
+module.exports = router;

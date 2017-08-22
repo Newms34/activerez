@@ -394,45 +394,16 @@ app.controller('find-ctrl', function($scope, userFact, $http, $q) {
                     $scope.makeChtData();
                 })
             } else {
-                $http.post('/user/gitgud', {git:$scope.user.github,
-                    user:$scope.user.user}).then((r)=>{
+                $http.post('/user/gitgud', {
+                    git: $scope.user.github,
+                    user: $scope.user.user
+                }).then((r) => {
                     console.log(r.data)
-                    $scope.cht.labels=r.data.lbls;
-                    $scope.cht.data[0]=r.data.data;
-                    console.log('CHART:',$scope.cht)
+                    $scope.cht.labels = r.data.lbls;
+                    $scope.cht.data[0] = r.data.data;
+                    console.log('CHART:', $scope.cht)
                     $scope.doColors();
-                })
-                // $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((reeps) => {
-                //     var proms = [];
-                //     reeps.data.forEach((rp)=>{
-                //         console.log('REPO', rp.name);
-                //         proms.push($http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/${rp.name}/languages`))
-                //     });
-                //     $q.all(proms).then((rpsLs)=>{
-                //         console.log(rpsLs);
-                //         rpsLs.data.forEach((rpLs)=>{
-                //             for (var lang in rpLs){
-                //                 if(rpLs.hasOwnProperty(lang)){
-                //                     var pos = $scope.cht.labels.indexOf(lang);
-                //                     if(pos<0){
-                //                         $scope.cht.labels.push(lang);
-                //                         $scope.cht.data[0].push(rpLs[lang]);
-                //                     }else{
-                //                         $scope.cht.data[0][pos]+=rpLs[lang];
-                //                     }
-                //                 }
-                //             }
-                //         });
-                //     });
-
-                //     $scope.cht.labels.push($scope.cht.labels.shift())
-                //     $scope.cht.data[0].push($scope.cht.data[0].shift())
-                //     for (var lbl in skillNums) {
-                //         $scope.cht.labels.push(lbl);
-                //         $scope.cht.data[0].push(skillNums[lbl]);
-                //     }
-                //     $scope.doColors();
-                // })
+                });
             };
         }
         if ($scope.chartFmt.id < 2) {
@@ -497,8 +468,9 @@ app.controller('find-ctrl', function($scope, userFact, $http, $q) {
             if ($scope.srchMode === 0) {
                 //name mode
                 $http.get('/user/allUsrs').then(function(r) {
+                    console.log('ALL USERS:', r)
                     $scope.users = r.data.filter((u) => {
-                        return u.first.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1 || u.last.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1;
+                        return (u.first && u.first.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1) || (u.last && u.last.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1) || (u.user.toLowerCase().indexOf($scope.searchParam) > -1);
                     });
                     $scope.deetUser = -1;
                 })
@@ -590,7 +562,9 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                         $scope.$digest();
                     });
                 } else {
-                    window.location.href = './'
+                    // console.log(resp.data)
+                    // window.location.href = './'
+                    $state.go('app.dash')
                 }
             })
         }
@@ -1063,8 +1037,120 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         })
     }
 });
-app.controller('nav-cont',function($scope,$http){
-	
+app.controller('nav-cont', function($scope, $http, userFact) {
+    $scope.msgs = [];
+    $scope.showCht = false;
+    $scope.user = null;
+    $scope.refUsr = function() {
+        //any time we need to refresh the user, this fn is run
+        userFact.getUser().then(function(r) {
+            $scope.user = r.user;
+        });
+    };
+    $scope.noBubz = function(e) {
+        e.stopPropagation();
+    }
+    $scope.refUsr();
+    //msg stuffs
+    $scope.trashBin = [];
+    $scope.currFold = 0;
+    $scope.folders = [{
+            title: 'Inbox',
+            fldr: 'msgs',
+            noMsg: "You haven't received any messages!",
+            icon: 'fa-envelope-open-o'
+        },
+        {
+            title: 'Deleted',
+            fldr: 'del',
+            noMsg: "You have no deleted messages. Messages in this folder are deleted upon closing this box.",
+            icon: 'fa-trash-o'
+        }, {
+            title: 'Outbox',
+            fldr: 'sent',
+            noMsg: "You haven't sent any messages!",
+            icon: 'fa-paper-plane-o'
+        }
+    ];
+    $scope.setFolder = (n) => {
+        $scope.currFold = n;
+        $scope.currMsg = 0;
+        $scope.msgMode = 0;
+        $scope.newMsg = {};
+    }
+    $scope.newMsg = {};
+    $scope.fim = {
+        msg: `I've got some bacon for you!`,
+        person: 'Bob',
+        read: false,
+        subj: 'Bacons',
+        id: '1234abc'
+    }
+    $scope.sendMsg = ()=>{
+    	console.log('attempting to send',$scope.newMsg);
+    	$http.get('/user/nameOkay/'+$scope.newMsg.person).then(function(r){
+    		if(r.data=='okay'){
+    			//note these responses seem 'backwards', as this route was originally used to see if a username was available for use;
+    			bootbox.alert({title:'User not found',message:`We can't find that user.`})
+    		}else{
+    			//everything good!
+    			$http.post('/user/sendMsg',{
+    				source:$scope.user.user,
+    				dest:$scope.newMsg.person,
+    				subj:$scope.newMsg.subj,
+    				msg:$scope.newMsg.msg
+    			}).then((mr)=>{
+    				if(mr.data=='ban'){
+    					bootbox.alert({title:'Cannot Send',message:`User ${$scope.newMsg.person} has blocked you! As such, you cannot send them messages.`})
+    				}else{
+    					$scope.refUsr();
+    					$scope.msgMode=0;
+    				}
+    				$scope.newMsg = {};
+    			})
+    		}
+    	})
+    }
+    $scope.setupReply=()=>{
+    	$scope.newMsg = {};
+    	$scope.newMsg.person=$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].person;
+    	$scope.newMsg.subj = 'Re: '+$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].subj
+    	$scope.msgMode = 2;
+    }
+    $scope.delMsg = (n)=>{
+    	bootbox.confirm('Delete this message?',function(r){
+    		if(!r || r==null){
+    			return false;
+    		}else{
+    			var type = $scope.currFold==2?'sent':'msgs';
+    			console.log('deleting message',$scope.user[$scope.folders[$scope.currFold].fldr])
+    			$http.post('/user/delMsg',{
+    				user:$scope.user.user,
+    				id:$scope.user[$scope.folders[$scope.currFold].fldr][n].msg,
+    				type:type
+    			}).then((dm)=>{
+    				$scope.user[type] = $scope.user[type].filter((dmi)=>{
+    					dmi.id!=dm.id;
+    				})
+    				$scope.trashBin.push(dm);
+    			})
+    		}
+    	})
+    }
+    $scope.currMsg = 0;
+    $scope.displMsg = (n) => {
+        $scope.currMsg = n;
+        $scope.msgMode=1;
+        if($scope.currFold==0 || !$scope.currFold && !$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].read){
+        	$http.post('/user/msgRead', {
+                    user: $scope.user.user,
+                    id: $scope.user[$scope.folders[$scope.currFold].fldr][n].id,
+                    type:$scope.folders[$scope.currFold].fldr
+                }).then((r) => {
+                    $scope.user[$scope.folders[$scope.currFold].fldr][n].read = true;
+                })
+        }
+    }
 })
 resetApp.controller('reset-contr',function($scope,$http){
 	$scope.key = window.location.href.slice(window.location.href.lastIndexOf('/')+1)

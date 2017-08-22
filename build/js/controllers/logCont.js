@@ -70,7 +70,9 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                         $scope.$digest();
                     });
                 } else {
-                    window.location.href = './'
+                    // console.log(resp.data)
+                    // window.location.href = './'
+                    $state.go('app.dash')
                 }
             })
         }

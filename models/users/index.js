@@ -48,6 +48,23 @@ var usrSchema = new mongoose.Schema({
         desc:String,
         current:{type:Boolean, default:false}//if true, this forces us to essentially ignore the 'end' value
     }],
+    msgs:[{
+        person:String,
+        time:Date,
+        msg:String,
+        subj:String,
+        read:{type:Boolean, default:false},
+        id:String
+    }],
+    sent:[{
+        person:String,
+        time:Date,
+        msg:String,
+        subj:String,
+        id:String
+    }],
+    contacts:[String],
+    blocked:[String],
     lastLogin:Date
 }, { collection: 'User' });
 

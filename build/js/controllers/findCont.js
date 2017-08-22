@@ -124,45 +124,16 @@ app.controller('find-ctrl', function($scope, userFact, $http, $q) {
                     $scope.makeChtData();
                 })
             } else {
-                $http.post('/user/gitgud', {git:$scope.user.github,
-                    user:$scope.user.user}).then((r)=>{
+                $http.post('/user/gitgud', {
+                    git: $scope.user.github,
+                    user: $scope.user.user
+                }).then((r) => {
                     console.log(r.data)
-                    $scope.cht.labels=r.data.lbls;
-                    $scope.cht.data[0]=r.data.data;
-                    console.log('CHART:',$scope.cht)
+                    $scope.cht.labels = r.data.lbls;
+                    $scope.cht.data[0] = r.data.data;
+                    console.log('CHART:', $scope.cht)
                     $scope.doColors();
-                })
-                // $http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/repos?per_page=100`).then((reeps) => {
-                //     var proms = [];
-                //     reeps.data.forEach((rp)=>{
-                //         console.log('REPO', rp.name);
-                //         proms.push($http.get(`https://api.github.com/users/${$scope.users[$scope.deetUser].github}/${rp.name}/languages`))
-                //     });
-                //     $q.all(proms).then((rpsLs)=>{
-                //         console.log(rpsLs);
-                //         rpsLs.data.forEach((rpLs)=>{
-                //             for (var lang in rpLs){
-                //                 if(rpLs.hasOwnProperty(lang)){
-                //                     var pos = $scope.cht.labels.indexOf(lang);
-                //                     if(pos<0){
-                //                         $scope.cht.labels.push(lang);
-                //                         $scope.cht.data[0].push(rpLs[lang]);
-                //                     }else{
-                //                         $scope.cht.data[0][pos]+=rpLs[lang];
-                //                     }
-                //                 }
-                //             }
-                //         });
-                //     });
-
-                //     $scope.cht.labels.push($scope.cht.labels.shift())
-                //     $scope.cht.data[0].push($scope.cht.data[0].shift())
-                //     for (var lbl in skillNums) {
-                //         $scope.cht.labels.push(lbl);
-                //         $scope.cht.data[0].push(skillNums[lbl]);
-                //     }
-                //     $scope.doColors();
-                // })
+                });
             };
         }
         if ($scope.chartFmt.id < 2) {
@@ -227,8 +198,9 @@ app.controller('find-ctrl', function($scope, userFact, $http, $q) {
             if ($scope.srchMode === 0) {
                 //name mode
                 $http.get('/user/allUsrs').then(function(r) {
+                    console.log('ALL USERS:', r)
                     $scope.users = r.data.filter((u) => {
-                        return u.first.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1 || u.last.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1;
+                        return (u.first && u.first.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1) || (u.last && u.last.toLowerCase().indexOf($scope.searchParam.toLowerCase()) > -1) || (u.user.toLowerCase().indexOf($scope.searchParam) > -1);
                     });
                     $scope.deetUser = -1;
                 })

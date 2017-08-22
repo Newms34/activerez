@@ -4,7 +4,53 @@
             <h3>Help</h3>
         </div>
         <div class='panel-body'>
-        	Help things!
+            <h1><a id="ActiveRez_0"></a>ActiveRez</h1>
+            <h4><a id="Resumes_with_Graphs_1"></a>Resumes with Graphs!</h4>
+            <hr>
+            <p><strong>Contents</strong>:</p>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#use">Use</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#technical-stuff">Technical Stuff</a></li>
+                <li><a href="#credits">Credits</a></li>
+            </ul>
+            <hr>
+            <h2><a id="About_11"></a>About</h2>
+            <p>ActiveRez is a resume viewing/search app, with graphs!:</p>
+            <ul>
+                <li>View your (or your clients’) skills broken down by type, in a nice, simple graph format!</li>
+                <li>See at a glance who does (or doesn’t) have skills relating to your job opening!</li>
+                <li>Find out what jobs would be best for you based on your skill set (partially implemented)!</li>
+            </ul>
+            <hr>
+            <h2><a id="Use_18"></a>Use</h2>
+            <p>To use ActiveRez, you’ll first need to create an account. Note that while we provide fields for lots of stuff (like work experience, your education, etc.) you only need to fill out as much as you want. We would ask that you provide an email, tho, just in case something goes horribly wrong and you need to reset your password.</p>
+            <p>The central part of ActiveRez is the <strong>Skills</strong> section. Here, you’ll enter new skills (or pick ones that others have already added) and then specify the number of years of experience you have with said skill (if you’re unsure, just take a guess; we won’t test you on it). Remember: the more skills you enter, the better!</p>
+            <hr>
+            <h2><a id="Troubleshooting_24"></a>Troubleshooting</h2>
+            <ul>
+                <li><strong>My login doesn’t work!:</strong> Firstly, be sure you typed your username and password correctly. If that doesn’t work, try resetting your password (to be implemented! Sorry!). Finally, if both options fail, there’s always the option that <em>I</em> messed something up. See the “I’ve some other problem!” section below.</li>
+                <li><strong>I’m lost!:</strong> I’m very sorry about that. I hope you can find direction in your life.</li>
+                <li><strong>My Repositories graph isn’t loading!:</strong> There’s a few possible causes here, but the most likely is that I’ve hit my rate limit for github. I’ll try to find an alternate option later, but for now, you’ll just have to wait a bit.</li>
+                <li><strong>I’ve some other problem!:</strong> Go ahead and <a href="https://github.com/newms34">yell at me</a> if that happens.</li>
+            </ul>
+            <hr>
+            <h2><a id="Technical_Stuff_32"></a>Technical Stuff</h2>
+            <p>ActiveRez uses a bunch of technologies. The following is a brief summary of them:</p>
+            <ul>
+                <li><em>HTML/CSS/JavaScript</em>: You know, the usual stuff.</li>
+                <li><em>AngularJS</em>: Good ol’ AngularJS 1.x, for the front-end. It’s not really <em>that</em> bad.</li>
+                <li><em>NodeJS</em>: Because server-side JS is pretty cool.</li>
+                <li><em>ExpressJS</em>: Because writing your own servers is cool, but writing your own routing stuff isn’t.</li>
+                <li><em>GulpJS et al.</em>: Shrinking/minifying stuff.</li>
+                <li><em>ChartJS / Angular-ChartJS</em>: These allow me to make pretty graphs. D3.JS was another option here, but ChartJS has the advantage of being incredibly simple to use. When you just want charts, this is often a better option</li>
+                <li><em>Github’s API</em>: I use this to fetch github user repo data. Right now, it’s admittedly at risk of rate limitting issues. However, the data they provide are invaluable either way.</li>
+                <li><em>Bootstrap/Bootbox</em>: Because I suck at design.</li>
+            </ul>
+            <hr>
+            <h2><a id="Credits_44"></a>Credits</h2>
+            <p>ActiveRez was written by me, <a href="https://github.com/newms34">David Newman</a>. I’m using a bunch of external tech, most of which is outlined in the above section (<a href="#technical-stuff">Technical Stuff</a></p>
         </div>
     </div>
 </div>

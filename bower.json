@@ -1,6 +1,6 @@
 {
-  "name": "ribbontoribbon",
-  "description": "cancer patient communication app",
+  "name": "activerez",
+  "description": "resumes with graphs",
   "main": "app.js",
   "authors": [
     "David Newman"
@@ -13,7 +13,7 @@
     "MEAN",
     "game"
   ],
-  "homepage": "https://github.com/Newms34/mazegame",
+  "homepage": "",
   "private": true,
   "ignore": [
     "**/.*",
