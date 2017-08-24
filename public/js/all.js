@@ -20,7 +20,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             templateUrl: 'layouts/full.html'
         })
         .state('app.dash', {
-            url: '/', //default route, if not 404
+            url: '/dash', //default route, if not 404
             templateUrl: 'components/dash.html'
         })
         .state('app.find', {
@@ -39,6 +39,10 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             url: '/login',
             templateUrl: 'components/login.html'
         })
+        .state('appSimp.front', {
+            url: '/',
+            templateUrl: 'components/front.html'
+        })
         .state('appSimp.register', {
             url: '/register',
             templateUrl: 'components/register.html'
@@ -53,69 +57,6 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             templateUrl: 'components/alt/500.html'
         })
 }]);
-
-app.factory('socketFac', function ($rootScope) {
-  var socket = io.connect();
-  return {
-    on: function (eventName, callback) {
-      socket.on(eventName, function () { 
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
-    },
-    emit: function (eventName, data, callback) {
-      socket.emit(eventName, data, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          if (callback) {
-            callback.apply(socket, args);
-          }
-        });
-      })
-    }
-  };
-});
-app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
-    $transitions.onBefore({ to: 'app.**' }, function(trans) {
-        var def = $q.defer();
-        console.log('TRANS',trans)
-        var usrCheck = trans.injector().get('userFact')
-        usrCheck.getUser().then(function(r) {
-            console.log(r.result)
-            if (r.result) {
-                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
-                def.resolve(true)
-            } else {
-                // User isn't authenticated. Redirect to a new Target State
-                def.resolve($state.target('appSimp.login', undefined, { location: true }))
-            }
-        });
-        return def.promise;
-    });
-    // $transitions.onFinish({ to: '*' }, function() {
-    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
-    // });
-}]);
-app.factory('userFact', function($http) {
-    return {
-        makeGroup: function() {
-            //do stuff
-        },
-        getDefaultLoc: function() {
-            return $http.get('//freegeoip.net/json/').then(function(r) {
-                return r.data;
-            })
-        },
-        getUser: function() {
-            return $http.get('/user/chkLog').then(function(s) {
-                console.log('getUser in fac says:', s)
-                return s.data;
-            })
-        }
-    };
-});
 
 app.controller('chat-cont', function($scope, userFact, $http, $state, $sce) {
     $scope.user = null;
@@ -562,8 +503,6 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                         $scope.$digest();
                     });
                 } else {
-                    // console.log(resp.data)
-                    // window.location.href = './'
                     $state.go('app.dash')
                 }
             })
@@ -647,7 +586,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                                 $state.go('appSimp.login')
                             });
                         } else {
-                            window.location.href = './'
+                            window.location.href = './dash'
                         }
                     })
                 });
@@ -987,7 +926,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                 theSkill.yrs = $scope.newSkill.yrs;
             }
             $http.post('/user/addSkill', theSkill).then((u) => {
-                $scope.addSkill=false;
+                $scope.addSkill = false;
                 $scope.refUsr();
             });
         }
@@ -1037,6 +976,60 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         })
     }
 });
+
+app.controller('front-cont', function($scope, $state) {
+    $scope.possCats = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Pi', 'Tau', 'Phi', 'Theta', 'Omega', 'Omicron', 'Sigma', 'Zeta']
+    $scope.fakeCht = {
+        data: [
+            []
+        ],
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            legend: {
+                display: true,
+                position: 'right',
+                labels: {
+                    fontColor: "white",
+                    fontSize: 14
+                }
+            },
+            title:{
+                display:true,
+                position:'top',
+                text:`Sample User's Skills`,
+                fontColor: "white",
+                padding:15,
+                fontSize:18
+            }
+        },
+        labels: [],
+        colors: [{ backgroundColor: [] }]
+    };
+    $scope.makeFakeCht = () => {
+        var catsCopy = angular.copy($scope.possCats);
+        var pieLen = Math.ceil(Math.random() * $scope.possCats.length-5)+2
+        var lbls = new Array(pieLen).fill(100, 0).map((n) => {
+            return 'Skill ' + catsCopy.splice(Math.floor(Math.random() * catsCopy.length), 1)[0]
+        });
+        var dataNums = lbls.map((n) => {
+            return Math.ceil(Math.random() * 100);
+        });
+        console.log(lbls, dataNums)
+        $scope.fakeCht.data[0] = dataNums;
+        $scope.fakeCht.labels = lbls;
+        $scope.fakeCht.colors[0].backgroundColor = lbls.map((c, i) => {
+            return `hsl(${(i*55)%360},90%,20%)`;
+        })
+    };
+    $scope.makeFakeCht();
+    $scope.goLog=()=>{
+        $state.go('appSimp.login')
+    }
+    $scope.lrnMoar = ()=>{
+        bootbox.alert('TBD')
+    }
+})
 app.controller('nav-cont', function($scope, $http, userFact) {
     $scope.msgs = [];
     $scope.showCht = false;
@@ -1049,6 +1042,7 @@ app.controller('nav-cont', function($scope, $http, userFact) {
     };
     $scope.noBubz = function(e) {
         e.stopPropagation();
+        e.preventDefault();
     }
     $scope.refUsr();
     //msg stuffs
@@ -1072,6 +1066,10 @@ app.controller('nav-cont', function($scope, $http, userFact) {
             icon: 'fa-paper-plane-o'
         }
     ];
+    $scope.showAB = false;
+    $scope.toggleAB = () => {
+        $scope.showAB = !$scope.showAB;
+    }
     $scope.setFolder = (n) => {
         $scope.currFold = n;
         $scope.currMsg = 0;
@@ -1086,69 +1084,132 @@ app.controller('nav-cont', function($scope, $http, userFact) {
         subj: 'Bacons',
         id: '1234abc'
     }
-    $scope.sendMsg = ()=>{
-    	console.log('attempting to send',$scope.newMsg);
-    	$http.get('/user/nameOkay/'+$scope.newMsg.person).then(function(r){
-    		if(r.data=='okay'){
-    			//note these responses seem 'backwards', as this route was originally used to see if a username was available for use;
-    			bootbox.alert({title:'User not found',message:`We can't find that user.`})
-    		}else{
-    			//everything good!
-    			$http.post('/user/sendMsg',{
-    				source:$scope.user.user,
-    				dest:$scope.newMsg.person,
-    				subj:$scope.newMsg.subj,
-    				msg:$scope.newMsg.msg
-    			}).then((mr)=>{
-    				if(mr.data=='ban'){
-    					bootbox.alert({title:'Cannot Send',message:`User ${$scope.newMsg.person} has blocked you! As such, you cannot send them messages.`})
-    				}else{
-    					$scope.refUsr();
-    					$scope.msgMode=0;
-    				}
-    				$scope.newMsg = {};
-    			})
-    		}
-    	})
+    $scope.sendMsg = () => {
+        console.log('attempting to send', $scope.newMsg);
+        $http.get('/user/nameOkay/' + $scope.newMsg.person).then(function(r) {
+            if (r.data == 'okay') {
+                //note these responses seem 'backwards', as this route was originally used to see if a username was available for use;
+                bootbox.alert({ title: 'User not found', message: `We can't find that user.` })
+            } else {
+                //everything good!
+                $http.post('/user/sendMsg', {
+                    source: $scope.user.user,
+                    dest: $scope.newMsg.person,
+                    subj: $scope.newMsg.subj,
+                    msg: $scope.newMsg.msg
+                }).then((mr) => {
+                    if (mr.data == 'ban') {
+                        bootbox.alert({ title: 'Cannot Send', message: `User ${$scope.newMsg.person} has blocked you! As such, you cannot send them messages.` })
+                    } else {
+                        $scope.refUsr();
+                        $scope.msgMode = 0;
+                    }
+                    $scope.newMsg = {};
+                })
+            }
+        })
     }
-    $scope.setupReply=()=>{
-    	$scope.newMsg = {};
-    	$scope.newMsg.person=$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].person;
-    	$scope.newMsg.subj = 'Re: '+$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].subj
-    	$scope.msgMode = 2;
+    $scope.setupReply = () => {
+        $scope.newMsg = {};
+        $scope.newMsg.person = $scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].person;
+        $scope.newMsg.subj = 'Re: ' + $scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].subj
+        $scope.msgMode = 2;
     }
-    $scope.delMsg = (n)=>{
-    	bootbox.confirm('Delete this message?',function(r){
-    		if(!r || r==null){
-    			return false;
-    		}else{
-    			var type = $scope.currFold==2?'sent':'msgs';
-    			console.log('deleting message',$scope.user[$scope.folders[$scope.currFold].fldr])
-    			$http.post('/user/delMsg',{
-    				user:$scope.user.user,
-    				id:$scope.user[$scope.folders[$scope.currFold].fldr][n].msg,
-    				type:type
-    			}).then((dm)=>{
-    				$scope.user[type] = $scope.user[type].filter((dmi)=>{
-    					dmi.id!=dm.id;
-    				})
-    				$scope.trashBin.push(dm);
-    			})
-    		}
-    	})
+    $scope.delMsg = (n) => {
+        bootbox.confirm('Delete this message?', function(r) {
+            if (!r || r == null) {
+                return false;
+            } else {
+                var type = $scope.currFold == 2 ? 'sent' : 'msgs';
+                console.log('deleting message', $scope.user[$scope.folders[$scope.currFold].fldr])
+                $http.post('/user/delMsg', {
+                    user: $scope.user.user,
+                    id: $scope.user[$scope.folders[$scope.currFold].fldr][n].msg,
+                    type: type
+                }).then((dm) => {
+                    $scope.user[type] = $scope.user[type].filter((dmi) => {
+                        dmi.id != dm.id;
+                    })
+                    $scope.trashBin.push(dm);
+                })
+            }
+        })
     }
     $scope.currMsg = 0;
     $scope.displMsg = (n) => {
         $scope.currMsg = n;
-        $scope.msgMode=1;
-        if($scope.currFold==0 || !$scope.currFold && !$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].read){
-        	$http.post('/user/msgRead', {
-                    user: $scope.user.user,
-                    id: $scope.user[$scope.folders[$scope.currFold].fldr][n].id,
-                    type:$scope.folders[$scope.currFold].fldr
-                }).then((r) => {
-                    $scope.user[$scope.folders[$scope.currFold].fldr][n].read = true;
-                })
+        $scope.msgMode = 1;
+        if ($scope.currFold == 0 || !$scope.currFold && !$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].read) {
+            $http.post('/user/msgRead', {
+                user: $scope.user.user,
+                id: $scope.user[$scope.folders[$scope.currFold].fldr][n].id,
+                type: $scope.folders[$scope.currFold].fldr
+            }).then((r) => {
+                $scope.user[$scope.folders[$scope.currFold].fldr][n].read = true;
+            })
+        }
+    }
+    $scope.mailUser = function(c,e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $scope.newMsg = { person: c };
+        $scope.msgMode=2;
+        $scope.showAB = false;
+        $scope.$digest();
+    };
+    $scope.removeCont = function(c) {
+        $http.post('/user/removeCont', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.removeBlock = function(c) {
+        $http.post('/user/removeBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.blockUser = function(c) {
+        $http.post('/user/addBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.unblockUser = function(c) {
+        $http.post('/user/removeBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $http.post('/user/addCont', {
+                user: $scope.user.user,
+                cont: c
+            }).then((r) => {
+
+                $scope.refUsr();
+            });
+        });
+    };
+    $scope.doNewCont = function(m, n) {
+        if (!n) {
+            bootbox.alert('Please enter a username.');
+        } else {
+            var contUrl = m == '0' ? '/user/addBlock' : '/user/addCont';
+            $http.post(contUrl, {
+                user: $scope.user.user,
+                cont: n
+            }).then((r) => {
+                if (r.data == 'no') {
+                    bootbox.alert(`We can't find that user! Are you sure you entered their name correctly?`);
+                } else {
+                    $scope.refUsr();
+                }
+            });
         }
     }
 })
@@ -1175,3 +1236,65 @@ resetApp.controller('reset-contr',function($scope,$http){
 		}
 	}
 })
+app.factory('socketFac', function ($rootScope) {
+  var socket = io.connect();
+  return {
+    on: function (eventName, callback) {
+      socket.on(eventName, function () { 
+        var args = arguments;
+        $rootScope.$apply(function () {
+          callback.apply(socket, args);
+        });
+      });
+    },
+    emit: function (eventName, data, callback) {
+      socket.emit(eventName, data, function () {
+        var args = arguments;
+        $rootScope.$apply(function () {
+          if (callback) {
+            callback.apply(socket, args);
+          }
+        });
+      })
+    }
+  };
+});
+app.run(['$rootScope', '$state', '$stateParams', '$transitions', '$q','userFact', function($rootScope, $state, $stateParams, $transitions, $q,userFact) {
+    $transitions.onBefore({ to: 'app.**' }, function(trans) {
+        var def = $q.defer();
+        console.log('TRANS',trans)
+        var usrCheck = trans.injector().get('userFact')
+        usrCheck.getUser().then(function(r) {
+            console.log(r.result)
+            if (r.result) {
+                // localStorage.twoRibbonsUser = JSON.stringify(r.user);
+                def.resolve(true)
+            } else {
+                // User isn't authenticated. Redirect to a new Target State
+                def.resolve($state.target('appSimp.login', undefined, { location: true }))
+            }
+        });
+        return def.promise;
+    });
+    // $transitions.onFinish({ to: '*' }, function() {
+    //     document.body.scrollTop = document.documentElement.scrollTop = 0;
+    // });
+}]);
+app.factory('userFact', function($http) {
+    return {
+        makeGroup: function() {
+            //do stuff
+        },
+        getDefaultLoc: function() {
+            return $http.get('//freegeoip.net/json/').then(function(r) {
+                return r.data;
+            })
+        },
+        getUser: function() {
+            return $http.get('/user/chkLog').then(function(s) {
+                console.log('getUser in fac says:', s)
+                return s.data;
+            })
+        }
+    };
+});

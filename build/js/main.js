@@ -20,7 +20,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
             templateUrl: 'layouts/full.html'
         })
         .state('app.dash', {
-            url: '/', //default route, if not 404
+            url: '/dash', //default route, if not 404
             templateUrl: 'components/dash.html'
         })
         .state('app.find', {
@@ -38,6 +38,10 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', functio
         .state('appSimp.login', {
             url: '/login',
             templateUrl: 'components/login.html'
+        })
+        .state('appSimp.front', {
+            url: '/',
+            templateUrl: 'components/front.html'
         })
         .state('appSimp.register', {
             url: '/register',

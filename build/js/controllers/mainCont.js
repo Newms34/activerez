@@ -281,7 +281,7 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
                 theSkill.yrs = $scope.newSkill.yrs;
             }
             $http.post('/user/addSkill', theSkill).then((u) => {
-                $scope.addSkill=false;
+                $scope.addSkill = false;
                 $scope.refUsr();
             });
         }
@@ -331,3 +331,57 @@ app.controller('main-cont', function($scope, $http, $state, userFact) {
         })
     }
 });
+
+app.controller('front-cont', function($scope, $state) {
+    $scope.possCats = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Pi', 'Tau', 'Phi', 'Theta', 'Omega', 'Omicron', 'Sigma', 'Zeta']
+    $scope.fakeCht = {
+        data: [
+            []
+        ],
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            legend: {
+                display: true,
+                position: 'right',
+                labels: {
+                    fontColor: "white",
+                    fontSize: 14
+                }
+            },
+            title:{
+                display:true,
+                position:'top',
+                text:`Sample User's Skills`,
+                fontColor: "white",
+                padding:15,
+                fontSize:18
+            }
+        },
+        labels: [],
+        colors: [{ backgroundColor: [] }]
+    };
+    $scope.makeFakeCht = () => {
+        var catsCopy = angular.copy($scope.possCats);
+        var pieLen = Math.ceil(Math.random() * $scope.possCats.length-5)+2
+        var lbls = new Array(pieLen).fill(100, 0).map((n) => {
+            return 'Skill ' + catsCopy.splice(Math.floor(Math.random() * catsCopy.length), 1)[0]
+        });
+        var dataNums = lbls.map((n) => {
+            return Math.ceil(Math.random() * 100);
+        });
+        console.log(lbls, dataNums)
+        $scope.fakeCht.data[0] = dataNums;
+        $scope.fakeCht.labels = lbls;
+        $scope.fakeCht.colors[0].backgroundColor = lbls.map((c, i) => {
+            return `hsl(${(i*55)%360},90%,20%)`;
+        })
+    };
+    $scope.makeFakeCht();
+    $scope.goLog=()=>{
+        $state.go('appSimp.login')
+    }
+    $scope.lrnMoar = ()=>{
+        bootbox.alert('TBD')
+    }
+})

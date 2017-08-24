@@ -1,98 +1,143 @@
 <nav class="navbar navbar-dark navbar-fixed-top" ng-controller='nav-cont'>
-    <div class="container-fluid" style='padding-right:0;'>
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">&nbsp;</a>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div ng-class="{'hideMob':hideNav}">
-            <ul class="nav navbar-nav">
-                <li>
-                    <a href="#" ui-sref='app.dash'><i class='fa fa-tachometer'></i> Dashboard</a>
+   <div class="container-fluid" style='padding-right:0;'>
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">&nbsp;</a>
+    </div>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div ng-class="{'hideMob':hideNav}">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#" ui-sref='app.dash'><i class='fa fa-tachometer'></i> Dashboard</a>
+            </li>
+            <li>
+                <a href="#" ui-sref='app.find'><i class='fa fa-search'></i> Search Resumes</a>
+            </li>
+            <li>
+                <a href="#" ng-click='showCht=true'><i class='fa fa-envelope' ng-if='user.msgs && user.msgs.length' title='You have {{user.msgs.length}} new message{{user.msgs.length>1?"s":""}}.'>&nbsp;<span class="badge">{{user.msgs.length}}</span></i><i class='fa fa-envelope-o' ng-if='!user.msgs || !user.msgs.length' title='You have no new messages.'></i></a>
+            </li>
+            <li>
+                <a href="#" ui-sref='app.help''><i class='fa fa-question-circle'></i> Help</a>
                 </li>
                 <li>
-                    <a href="#" ui-sref='app.find'><i class='fa fa-search'></i> Search Resumes</a>
-                </li>
-                <li>
-                    <a href="#" ng-click='showCht=true'><i class='fa fa-envelope ' ng-if='user.msgs && user.msgs.length ' title='You have {{user.msgs.length}} new message{{user.msgs.length>1?"s":""}}.'>&nbsp;<span class="badge">{{user.msgs.length}}</span></i><i class='fa fa-envelope-o' ng-if='!user.msgs || !user.msgs.length' title='You have no new messages.'></i></a>
-                </li>
-                <li>
-                    <a href="#" ui-sref='app.help' '><i class='fa fa-question-circle '></i> Help</a>
-                </li>
-                <li>
-                <a href="#" ng-click='logout(); '><i class='fa fa-sign-out '></i>Logout</a>
+                    <a href="#" ng-click='logout();'><i class='fa fa-sign-out'></i>Logout</a>
                 </li>
             </ul>
         </div>
         <!-- /.navbar-collapse -->
     </div>
     <!-- /.container-fluid -->
-<div ng-show='showCht ' class='deet-bg container ' ng-click='showCht=false; '>
-    <div class='col-md-8 col-md-offset-2 panel panel-info cht-box ' ng-click='noBubz($event); '>
-        <div class='panel-heading '>
-            <h4>Messages
-            <button class='btn btn-primary pull-right '  ng-click='showCht=false; ' title='close '><i class='fa fa-times '></i></button>
-            <button class='btn btn-primary pull-right'  ng-click='msgMode=2'  title='New Message '><i class='fa fa-pencil-square-o'></i></button>
-            </h4>
-        </div>
-        <div class='panel-body no-pad '>
-            <div class='col-md-12 no-pad ' style='height:100% '>
-                <div class='col-md-3 msg-folder-list no-pad '>
-                    <div class='folder ' ng-class="{'btn-info ':currFold==$index}" ng-repeat='fl in folders ' ng-click='setFolder($index); '><i class='fa {{fl.icon}} '></i> {{fl.title}}</div>
-                </div>
-                <div class='col-md-9 no-pad ' ng-if='!msgMode || msgMode==0 '>
-                    <!-- list mode -->
-                    <div class='col-md-12 alert-danger ' style='line-height:20pt ' ng-if='(currFold!=1 && !user[folders[currFold].fldr].length) || (currFold==1 && !trashBin.length) '>{{folders[currFold].noMsg}}</div>
-                    <div class='btn-default col-md-12 folder ' ng-repeat='msg in (currFold==1?trashBin:user[folders[currFold].fldr]) '>
-                        <div ng-class='{ "unread":!currFold && !msg.read} ' ng-click='displMsg($index); '>{{msg.person}} - {{msg.subj}}</div>
+    <div ng-show='showCht' class='deet-bg container' ng-click='showCht=false;'>
+        <div class='col-md-8 col-md-offset-2 panel panel-info cht-box' ng-click='noBubz($event);'>
+            <div class='panel-heading'>
+                <h4>Messages
+                    <button class='btn btn-primary pull-right' ng-click='showCht=false;' title='close'><i class='fa fa-times'></i></button>
+                    <button class='btn btn-primary pull-right'  ng-click='msgMode=2'  title='New Message'><i class='fa fa-pencil-square-o'></i></button>
+                    <button class='btn btn-primary pull-right' title='View Contact List' ng-click='showAB=true;'>
+                    <i class='fa fa-list-ul'></i> 
+                    </button>
+                </h4>
+            </div>
+            <div class='panel-body no-pad'>
+                <div class='col-md-12 no-pad' style='height:100%'>
+                    <div class='col-md-3 msg-folder-list no-pad'>
+                        <div class='folder' ng-class="{'btn-info':currFold==$index}" ng-repeat='fl in folders' ng-click='setFolder($index);'><i class='fa {{fl.icon}}'></i> {{fl.title}}</div>
                     </div>
-                </div>
-                <div class='col-md-9 no-pad ' ng-if='msgMode==1 '>
-                    <!-- msg view mode -->
-                    <br>
-                    <div class='col-md-2 msg-title '>Sender:</div>
-                    <div class='col-md-9 '>{{currFold==1?trashBin[currMsg].person:user[folders[currFold].fldr][currMsg].person}}</div>
-                    <br>
-                    <div class='col-md-2 msg-title '>Subject:</div>
-                    <div class='col-md-9 '>{{currFold==1?trashBin[currMsg].subj:user[folders[currFold].fldr][currMsg].subj}}</div>
-                    <hr>
-                    <div class='col-md-12 msg-title '>Message:</div>
-                    <div class='col-md-12 jumbotron '>{{currFold==1?trashBin[currMsg].msg:user[folders[currFold].fldr][currMsg].msg}}</div>
-                    <br>
-                    <hr>
-                    <div class='col-md-12 '>
-                        <button class='btn btn-info ' ng-click='setFolder(currFold) '><i class='fa fa-arrow-left '></i> Back to Messages</button>
-                        <button class='btn btn-primary ' ng-click='setupReply() '><i class='fa fa-reply '></i> Reply</button>
-                        <button class='btn btn-danger ' ng-click='delMsg(currMsg); '><i class='fa fa-times '></i> Delete Message</button>
+                    <div class='col-md-9 no-pad' ng-if='!msgMode || msgMode==0'>
+                        <!-- list mode -->
+                        <div class='col-md-12 alert-danger' style='line-height:20pt' ng-if='(currFold!=1 && !user[folders[currFold].fldr].length) || (currFold==1 && !trashBin.length)'>{{folders[currFold].noMsg}}</div>
+                        <div class='btn-default col-md-12 folder' ng-repeat='msg in (currFold==1?trashBin:user[folders[currFold].fldr])'>
+                            <div ng-class='{ "unread":!currFold && !msg.read}' ng-click='displMsg($index);'>{{msg.person}} - {{msg.subj}}</div>
+                        </div>
                     </div>
-                </div>
-                <div class='col-md-9 no-pad ' ng-if='msgMode==2 '>
-                    <!-- msg write mode -->
-                    <br>
-                    <div class='col-md-12 '>
-                        <div class='col-md-2 msg-title '>To:</div>
-                            <input type="text" class='col-md-9 ' ng-model='newMsg.person '>
+                    <div class='col-md-9 no-pad' ng-if='msgMode==1'>
+                        <!-- msg view mode -->
+                        <br>
+                        <div class='col-md-2 msg-title'>Sender:</div>
+                        <div class='col-md-9'>{{currFold==1?trashBin[currMsg].person:user[folders[currFold].fldr][currMsg].person}}</div>
+                        <br>
+                        <div class='col-md-2 msg-title'>Subject:</div>
+                        <div class='col-md-9'>{{currFold==1?trashBin[currMsg].subj:user[folders[currFold].fldr][currMsg].subj}}</div>
+                        <hr>
+                        <div class='col-md-12 msg-title'>Message:</div>
+                        <div class='col-md-12 jumbotron'>{{currFold==1?trashBin[currMsg].msg:user[folders[currFold].fldr][currMsg].msg}}</div>
+                        <br>
+                        <hr>
+                        <div class='col-md-12'>
+                            <button class='btn btn-info' ng-click='setFolder(currFold)'><i class='fa fa-arrow-left'></i> Back to Messages</button>
+                            <button class='btn btn-primary' ng-click='setupReply()'><i class='fa fa-reply'></i> Reply</button>
+                            <button class='btn btn-danger' ng-click='delMsg(currMsg);'><i class='fa fa-times'></i> Delete Message</button>
+                        </div>
                     </div>
-                    <br>
-                    <div class='col-md-12 '>
-                        <div class='col-md-2 msg-title '>Subject:</div>
-                        <input class='col-md-9 ' type="text" ng-model='newMsg.subj'>
-                    </div>
-                    <hr class='col-md-10'>
-                    <div class='col-md-12 msg-title '>Message:</div>
-                    <div class='col-md-12 '>
-                        <textarea class='col-md-12 ' ng-model='newMsg.msg ' style='min-height:300px '></textarea>
-                    </div>
-                    <br>
-                    <br>
-                    <hr class='col-md-10'>
-                    <div class='col-md-12 '>
-                        <button class='btn btn-primary ' ng-click='sendMsg(); '><i class='fa fa-paper-plane-o '></i> Send</button>
-                        <button class='btn btn-info ' ng-click='setFolder(currFold) '><i class='fa fa-times '></i>Cancel</button>
+                    <div class='col-md-9 no-pad' ng-if='msgMode==2'>
+                        <!-- msg write mode -->
+                        <br>
+                        <div class='col-md-12'>
+                            <div class='col-md-2 msg-title'>
+                                To:
+                            </div>
+                            <input type="text" class='col-md-9' ng-model='newMsg.person'>
+                        </div>
+                        <br>
+                        <div class='col-md-12'>
+                            <div class='col-md-2 msg-title'>Subject:</div>
+                            <input class='col-md-9' type="text" ng-model='newMsg.subj'>
+                        </div>
+                        <hr class='col-md-10'>
+                        <div class='col-md-12 msg-title'>Message:</div>
+                        <div class='col-md-12'>
+                            <textarea class='col-md-12' ng-model='newMsg.msg' style='min-height:300px'></textarea>
+                        </div>
+                        <br>
+                        <br>
+                        <hr class='col-md-10'>
+                        <div class='col-md-12'>
+                            <button class='btn btn-primary' ng-click='sendMsg();'><i class='fa fa-paper-plane-o'></i> Send</button>
+                            <button class='btn btn-info' ng-click='setFolder(currFold)'><i class='fa fa-times'></i>Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div ng-if='showAB' class='panel panel-primary col-md-4 col-md-offset-4 addr-book' ng-click='noBubz($event);'>
+            <div class='panel-heading'>Contacts
+                <button class='btn btn-primary btn-xs pull-right' ng-click='toggleAB();noBubz($event);'><i class='fa fa-times'></i></button>
+            </div>
+            <div class='panel-body'>
+                <div class='col-md-12 row'>
+                    <div class='col-md-3'>Add a user</div>
+                    <input type="text" ng-model='newCont' class='col-md-6'>
+                    <div class='col-md-3'>
+                        <button class='btn btn-danger button-xs pull-right' title='Block Contact' ng-click='doNewCont(0,newCont)'><i class='fa fa-times'></i></button>
+                        <button class='btn btn-success button-xs pull-right' title='Add Contact' ng-click='doNewCont(1,newCont)'><i class='fa fa-check'></i></button>
+                    </div>
+                </div>
+                <table class='table'>
+                    <thead>
+                        <tr>
+                            <th class='col-md-7'>Name</th>
+                            <th class='col-md-4'>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat='c in user.contacts' class='cont-row'>
+                            <td>{{c}}</td>
+                            <td>
+                                <button class='btn btn-primary button-xs' title='Send Mail' ng-click='mailUser(c,$event)'><i class='fa fa-envelope'></i></button>
+                                <button class='btn btn-info button-xs' title='Remove Contact' ng-click='removeCont(c)'><i class='fa fa-trash'></i></button>
+                                <button class='btn btn-danger button-xs' title='Block' ng-click='blockUser(c)'><i class='fa fa-times'></i></button>
+                            </td>
+                        </tr>
+                        <tr ng-repeat='b in user.blocked' class='block-row'>
+                            <td>{{b}}</td>
+                            <td>
+                                <button class='btn btn-success button-xs' title='Unblock' ng-click='unblockUser(b)'><i class='fa fa-check'></i></button>
+                                <button class='btn btn-info button-xs' title='Remove from Block List' ng-click='removeBlock(b)'><i class='fa fa-trash'></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
 </nav>

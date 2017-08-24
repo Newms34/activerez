@@ -70,8 +70,6 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                         $scope.$digest();
                     });
                 } else {
-                    // console.log(resp.data)
-                    // window.location.href = './'
                     $state.go('app.dash')
                 }
             })
@@ -155,7 +153,7 @@ app.controller('log-cont', function($scope, $http, $state, $q, userFact) {
                                 $state.go('appSimp.login')
                             });
                         } else {
-                            window.location.href = './'
+                            window.location.href = './dash'
                         }
                     })
                 });

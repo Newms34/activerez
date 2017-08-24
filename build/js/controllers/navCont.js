@@ -10,6 +10,7 @@ app.controller('nav-cont', function($scope, $http, userFact) {
     };
     $scope.noBubz = function(e) {
         e.stopPropagation();
+        e.preventDefault();
     }
     $scope.refUsr();
     //msg stuffs
@@ -33,6 +34,10 @@ app.controller('nav-cont', function($scope, $http, userFact) {
             icon: 'fa-paper-plane-o'
         }
     ];
+    $scope.showAB = false;
+    $scope.toggleAB = () => {
+        $scope.showAB = !$scope.showAB;
+    }
     $scope.setFolder = (n) => {
         $scope.currFold = n;
         $scope.currMsg = 0;
@@ -47,69 +52,132 @@ app.controller('nav-cont', function($scope, $http, userFact) {
         subj: 'Bacons',
         id: '1234abc'
     }
-    $scope.sendMsg = ()=>{
-    	console.log('attempting to send',$scope.newMsg);
-    	$http.get('/user/nameOkay/'+$scope.newMsg.person).then(function(r){
-    		if(r.data=='okay'){
-    			//note these responses seem 'backwards', as this route was originally used to see if a username was available for use;
-    			bootbox.alert({title:'User not found',message:`We can't find that user.`})
-    		}else{
-    			//everything good!
-    			$http.post('/user/sendMsg',{
-    				source:$scope.user.user,
-    				dest:$scope.newMsg.person,
-    				subj:$scope.newMsg.subj,
-    				msg:$scope.newMsg.msg
-    			}).then((mr)=>{
-    				if(mr.data=='ban'){
-    					bootbox.alert({title:'Cannot Send',message:`User ${$scope.newMsg.person} has blocked you! As such, you cannot send them messages.`})
-    				}else{
-    					$scope.refUsr();
-    					$scope.msgMode=0;
-    				}
-    				$scope.newMsg = {};
-    			})
-    		}
-    	})
+    $scope.sendMsg = () => {
+        console.log('attempting to send', $scope.newMsg);
+        $http.get('/user/nameOkay/' + $scope.newMsg.person).then(function(r) {
+            if (r.data == 'okay') {
+                //note these responses seem 'backwards', as this route was originally used to see if a username was available for use;
+                bootbox.alert({ title: 'User not found', message: `We can't find that user.` })
+            } else {
+                //everything good!
+                $http.post('/user/sendMsg', {
+                    source: $scope.user.user,
+                    dest: $scope.newMsg.person,
+                    subj: $scope.newMsg.subj,
+                    msg: $scope.newMsg.msg
+                }).then((mr) => {
+                    if (mr.data == 'ban') {
+                        bootbox.alert({ title: 'Cannot Send', message: `User ${$scope.newMsg.person} has blocked you! As such, you cannot send them messages.` })
+                    } else {
+                        $scope.refUsr();
+                        $scope.msgMode = 0;
+                    }
+                    $scope.newMsg = {};
+                })
+            }
+        })
     }
-    $scope.setupReply=()=>{
-    	$scope.newMsg = {};
-    	$scope.newMsg.person=$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].person;
-    	$scope.newMsg.subj = 'Re: '+$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].subj
-    	$scope.msgMode = 2;
+    $scope.setupReply = () => {
+        $scope.newMsg = {};
+        $scope.newMsg.person = $scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].person;
+        $scope.newMsg.subj = 'Re: ' + $scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].subj
+        $scope.msgMode = 2;
     }
-    $scope.delMsg = (n)=>{
-    	bootbox.confirm('Delete this message?',function(r){
-    		if(!r || r==null){
-    			return false;
-    		}else{
-    			var type = $scope.currFold==2?'sent':'msgs';
-    			console.log('deleting message',$scope.user[$scope.folders[$scope.currFold].fldr])
-    			$http.post('/user/delMsg',{
-    				user:$scope.user.user,
-    				id:$scope.user[$scope.folders[$scope.currFold].fldr][n].msg,
-    				type:type
-    			}).then((dm)=>{
-    				$scope.user[type] = $scope.user[type].filter((dmi)=>{
-    					dmi.id!=dm.id;
-    				})
-    				$scope.trashBin.push(dm);
-    			})
-    		}
-    	})
+    $scope.delMsg = (n) => {
+        bootbox.confirm('Delete this message?', function(r) {
+            if (!r || r == null) {
+                return false;
+            } else {
+                var type = $scope.currFold == 2 ? 'sent' : 'msgs';
+                console.log('deleting message', $scope.user[$scope.folders[$scope.currFold].fldr])
+                $http.post('/user/delMsg', {
+                    user: $scope.user.user,
+                    id: $scope.user[$scope.folders[$scope.currFold].fldr][n].msg,
+                    type: type
+                }).then((dm) => {
+                    $scope.user[type] = $scope.user[type].filter((dmi) => {
+                        dmi.id != dm.id;
+                    })
+                    $scope.trashBin.push(dm);
+                })
+            }
+        })
     }
     $scope.currMsg = 0;
     $scope.displMsg = (n) => {
         $scope.currMsg = n;
-        $scope.msgMode=1;
-        if($scope.currFold==0 || !$scope.currFold && !$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].read){
-        	$http.post('/user/msgRead', {
-                    user: $scope.user.user,
-                    id: $scope.user[$scope.folders[$scope.currFold].fldr][n].id,
-                    type:$scope.folders[$scope.currFold].fldr
-                }).then((r) => {
-                    $scope.user[$scope.folders[$scope.currFold].fldr][n].read = true;
-                })
+        $scope.msgMode = 1;
+        if ($scope.currFold == 0 || !$scope.currFold && !$scope.user[$scope.folders[$scope.currFold].fldr][$scope.currMsg].read) {
+            $http.post('/user/msgRead', {
+                user: $scope.user.user,
+                id: $scope.user[$scope.folders[$scope.currFold].fldr][n].id,
+                type: $scope.folders[$scope.currFold].fldr
+            }).then((r) => {
+                $scope.user[$scope.folders[$scope.currFold].fldr][n].read = true;
+            })
+        }
+    }
+    $scope.mailUser = function(c,e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $scope.newMsg = { person: c };
+        $scope.msgMode=2;
+        $scope.showAB = false;
+        $scope.$digest();
+    };
+    $scope.removeCont = function(c) {
+        $http.post('/user/removeCont', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.removeBlock = function(c) {
+        $http.post('/user/removeBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.blockUser = function(c) {
+        $http.post('/user/addBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $scope.refUsr();
+        });
+    };
+    $scope.unblockUser = function(c) {
+        $http.post('/user/removeBlock', {
+            user: $scope.user.user,
+            cont: c
+        }).then((r) => {
+            $http.post('/user/addCont', {
+                user: $scope.user.user,
+                cont: c
+            }).then((r) => {
+
+                $scope.refUsr();
+            });
+        });
+    };
+    $scope.doNewCont = function(m, n) {
+        if (!n) {
+            bootbox.alert('Please enter a username.');
+        } else {
+            var contUrl = m == '0' ? '/user/addBlock' : '/user/addCont';
+            $http.post(contUrl, {
+                user: $scope.user.user,
+                cont: n
+            }).then((r) => {
+                if (r.data == 'no') {
+                    bootbox.alert(`We can't find that user! Are you sure you entered their name correctly?`);
+                } else {
+                    $scope.refUsr();
+                }
+            });
         }
     }
 })

@@ -1,0 +1,13 @@
+<div ng-controller='front-cont' class='hero'>
+    <div class='col-md-5 col-md-offset-1'>
+        <h1>No more guessing.</h1>
+        <h5>Hire position-appropriate candidates, based on real data.</h5>
+        <div class='col-md-12'>
+            <button class='btn btn-primary btn-lg' ng-click='goLog()'>Start</button>
+            <button class='btn btn-info btn-lg' ng-click='lrnMoar()'>Learn More</button>
+        </div>
+    </div>
+    <div class='jumbotron col-md-5' style='min-height:380px'>
+        <canvas class="chart chart-pie" chart-data="fakeCht.data" chart-labels="fakeCht.labels" chart-legend="false" chart-options="fakeCht.options" chart-colors="fakeCht.colors" height="270"></canvas>
+    </div>
+</div>

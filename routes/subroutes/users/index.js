@@ -21,12 +21,10 @@ var router = express.Router(),
     pReq = Promise.promisifyAll(require('request')),
     request = require('request');
 fs.readFile('./seekritz.js','utf8',function(err,data){
-    console.log('READFILE!: err',err,'data',data);
     if(err){
         return false; //probly remote, so no key file
     }
     var keez = JSON.parse(data);
-    console.log(keez,keez.id);
     cid = keez.id;
     csecret = keez.secret;
 })
@@ -461,6 +459,9 @@ router.post('/addCont', function(req, res, next) {
                 if (cpos > -1 || !contres) {
                     res.send('no'); //either user already in list, or doesnt exist
                 } else {
+                    if(bpos>-1){
+                        uRes.contacts.splice(bpos,1);
+                    }
                     ures.contacts.push(req.body.cont);
                     ures.save(function(err, nusr) {
                         res.send('done');
@@ -503,6 +504,9 @@ router.post('/addBlock', function(req, res, next) {
                 if (bpos > -1 || !contres) {
                     res.send('no'); //either user already in list, or doesnt exist
                 } else {
+                    if(cpos>-1){
+                        ures.contacts.splice(cpos,1);
+                    }
                     ures.blocked.push(req.body.cont);
                     ures.save(function(err, nusr) {
                         res.send('done');
@@ -521,10 +525,10 @@ router.post('/removeBlock', function(req, res, next) {
             mongoose.model('User').findOne({ user: req.body.cont }, function(err, contres) {
                 var cpos = ures.contacts.indexOf(req.body.cont),
                     bpos = ures.blocked.indexOf(req.body.cont);
-                if (pbos < 0 || !contres) {
+                if (bpos < 0 || !contres) {
                     res.send('no'); //either user already in list, or doesnt exist
                 } else {
-                    ures.blocked.splice(pos, 1);
+                    ures.blocked.splice(bpos, 1);
                     ures.save(function(err, nusr) {
                         res.send('done');
                     })

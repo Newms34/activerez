@@ -4,7 +4,7 @@ body {
     margin: 0;
     height: 100%;
     padding-top: 40px;
-    background: url('../img/bg.jpg');
+    background: linear-gradient(rgba(10, 10, 10, .75), rgba(10, 10, 10, .75)), url('../img/bg.jpg');
     background-attachment: fixed;
     & #main-box {
         width: 95%;
@@ -12,7 +12,7 @@ body {
         left: 2.5%;
         min-height: 100vh;
         padding: 10px;
-        // background: #fff;
+
         &.ng-enter {
             /* transition on enter for .5s */
             transition: 2s;
@@ -24,17 +24,11 @@ body {
             /* end with opacity 1 (fade in) */
             opacity: 1;
         }
-        // &.ng-leave {
-        //     transition: 2s;
-        //     opacity: 1;
-        // }
-        // &.ng-leave-active {
-        //     opacity: 0;
-        // }
     }
 }
-.bootbox{
-    z-index:1300;
+
+.bootbox {
+    z-index: 1300;
 }
 
 .reg-grp {
@@ -70,7 +64,7 @@ label {
 
 .big-info {
     min-height: 100px;
-    & > .form-control {
+    &>.form-control {
         min-height: 100px;
     }
 }
@@ -101,20 +95,20 @@ label {
 
 .med-info {
     min-height: 60px;
-    & > .form-control {
+    &>.form-control {
         min-height: 60px;
     }
 }
 
 .huge-info {
     min-height: 200px;
-    & > .form-control {
+    &>.form-control {
         min-height: 200px;
     }
 }
 
 .picked {
-    & > span {
+    &>span {
         background: #339;
         color: #fff;
     }
@@ -126,28 +120,58 @@ label {
 
 .tab-row {
     padding: 0;
-    margin:0;
+    margin: 0;
     .tab {
         text-align: center;
         height: 50px;
-        line-height:50px;
-        cursor:pointer;
-        &.active-tab{
-            background:#204D74;
+        line-height: 50px;
+        cursor: pointer;
+        &.active-tab {
+            background: #204D74;
         }
     }
 }
 
-.deet-bg{
-    position:fixed;
-    z-index:1234;
-    background:rgba(0,0,0,0.5);
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    & > .panel{
-        position:relative;
-        top:20px;
+.deet-bg {
+    position: fixed;
+    z-index: 1234;
+    background: rgba(0, 0, 0, 0.5);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    &>.panel {
+        position: relative;
+        top: 20px;
+        &.addr-book {
+            position: fixed;
+            color: #222;
+            top: 30px;
+            box-shadow: 0 0 40px #333;
+            & .cont-row {
+                color: #090;
+            }
+            & .block-row td:first-child {
+                color: #900;
+                text-decoration: line-through;
+            }
+        }
+    }
+}
+
+.hero {
+    min-height: 70%;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    font-size: larger;
+    font-family: 'arial';
+    letter-spacing:1.5px;
+    & h1 {
+        font-weight: bold;
+    }
+    & .jumbotron{
+        background:#335
     }
 }
