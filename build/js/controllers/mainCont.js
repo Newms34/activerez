@@ -356,7 +356,8 @@ app.controller('front-cont', function($scope, $state) {
                 fontColor: "white",
                 padding:15,
                 fontSize:18
-            }
+            },
+            segmentShowStroke: false
         },
         labels: [],
         colors: [{ backgroundColor: [] }]

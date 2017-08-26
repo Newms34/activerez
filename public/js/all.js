@@ -1001,14 +1001,15 @@ app.controller('front-cont', function($scope, $state) {
                 fontColor: "white",
                 padding:15,
                 fontSize:18
-            }
+            },
+            segmentShowStroke: false
         },
         labels: [],
         colors: [{ backgroundColor: [] }]
     };
     $scope.makeFakeCht = () => {
         var catsCopy = angular.copy($scope.possCats);
-        var pieLen = Math.ceil(Math.random() * $scope.possCats.length-5)+2
+        var pieLen = Math.ceil(Math.random() * ($scope.possCats.length-5))+2
         var lbls = new Array(pieLen).fill(100, 0).map((n) => {
             return 'Skill ' + catsCopy.splice(Math.floor(Math.random() * catsCopy.length), 1)[0]
         });
@@ -1024,7 +1025,7 @@ app.controller('front-cont', function($scope, $state) {
     };
     $scope.makeFakeCht();
     $scope.goLog=()=>{
-        $state.go('appSimp.login')
+        $state.go('appSimp.register')
     }
     $scope.lrnMoar = ()=>{
         bootbox.alert('TBD')
