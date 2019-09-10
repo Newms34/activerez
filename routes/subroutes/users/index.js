@@ -27,7 +27,7 @@ fs.readFile('./seekritz.js','utf8',function(err,data){
     var keez = JSON.parse(data);
     cid = keez.id;
     csecret = keez.secret;
-})
+});
 router.get('/usrData/:name', function(req, res, next) {
     if (!req.session || !req.session.user || !req.session.user.user || req.session.user.user != req.params.name) {
         res.send('no'); //auth err!
