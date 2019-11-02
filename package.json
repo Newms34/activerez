@@ -18,7 +18,7 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-ng-annotate": "^2.0.0",
-    "mongoose": "^4.4.13",
+    "mongoose": "^5.7.7",
     "node-sass": "^3.7.0",
     "nodemon": "^1.9.1",
     "passport": "^0.3.2",
